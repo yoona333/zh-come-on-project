@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Me Page</title>
+    <style>
+        body {font-family: Arial, sans-serif;}
+        #userInfo {margin-top: 20px; border: 1px solid #ddd; padding: 10px; width: 300px;}
+        button {padding: 5px 10px; margin-top: 10px;}
+    </style>
+</head>
+<body>
+    <h2>Welcome, User!</h2>
+    <button id="getUserInfo" disabled>Get User Info</button>
+    <button id="logout">Logout</button> <!-- 添加退出按钮 -->
+    <div id="userInfo"></div>
+    <script>
+        // 初始检查Token是否存在
+        const token = localStorage.getItem('token');
+        const getUserInfoButton = document.getElementById('getUserInfo');
+        const logoutButton = document.getElementById('logout');
+        
+        // 检查Token并启用按钮
+        if (token) {
+            getUserInfoButton.disabled = false;
+        } else {
+            alert('Please log in first.');
+            window.location.href = '/login';
+        }
+
+        // 绑定获取用户信息按钮的点击事件
+        getUserInfoButton.addEventListener('click', function() {
+            fetch('/api/me', {
+                method: 'GET',
+                headers: {
+                    'x-access-token': token
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user info.');
+                }
+            })
+            .then(data => {
+                document.getElementById('userInfo').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+                if (error.message.includes('Failed to fetch user info') || error.message.includes('401')) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            });
+        });
+
+        // 绑定退出按钮的点击事件
+        logoutButton.addEventListener('click', function() {
+            localStorage.removeItem('token'); // 清除Token缓存
+            window.location.href = '/login'; // 重定向到登录页面
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+/* UpdateErrorPage.module.css */
+.updateErrorPageContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.updateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inputField,
+.textareaField {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.textareaField {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.inputField:focus,
+.textareaField:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.submitButton {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.submitButton:hover {
+  background-color: #0056b3;
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
