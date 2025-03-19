@@ -1,0 +1,92 @@
+/* home.module.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed; /* 固定在顶部 */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* 确保在页面最上层 */
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+}
+
+.menuList {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 15px;
+  transition: background-color 0.3s;
+}
+
+.menuButton:hover,
+.active .menuButton {
+  background-color: #555;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownMenu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  min-width: 150px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  z-index: 1001;
+}
+
+.dropdownMenu a {
+  display: block;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.dropdownMenu a:hover {
+  background-color: #f4f4f4;
+}
+
+.dropdown:hover .dropdownMenu {
+  display: block;
+}
+
+.logoutButton {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 20px;
+  margin-left: auto;
+  transition: background-color 0.3s;
+}
+
+.logoutButton:hover {
+  background-color: #fff;
+  color: #333;
+}

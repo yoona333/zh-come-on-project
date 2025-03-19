@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Authentication</title>
+    <style>
+        body {font-family: Arial, sans-serif;}
+        form {margin-bottom: 20px;}
+        label {display: block;margin-bottom: 5px;}
+        input {display: block;margin-bottom: 10px;padding: 5px;width: 200px;}
+        button {padding: 5px 10px;}
+    </style>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="loginUsername">Username:</label>
+        <input type="text" id="loginUsername" required>
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" required>
+        <button type="submit">Login</button>
+    </form>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.auth) {
+                    localStorage.setItem('token', data.token);
+                    alert(data.token);
+                    alert('登录成功');
+                    window.location.href = '/me';
+                } else {
+                    alert('登录失败');
+                }
+            })
+            .catch(error => alert('出错啦'));
+        });
+    </script>
+</body>
+</html>

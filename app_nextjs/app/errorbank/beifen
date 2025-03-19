@@ -1,0 +1,194 @@
+// "use client";
+
+// import React, { useState, useEffect } from 'react';
+// import axios, { AxiosError } from 'axios';
+// import Home from '../homedaohan/page'; // 引入Sidebar组件
+// import styles from '../css/ErrorBankPage.module.css';
+
+// // 定义API响应的类型
+// interface ErrorBankItem {
+//   Wrong_name: string;
+//   Wrong_content: string;
+//   Wrong_type: string;
+//   Wrong_file: string;
+//   Wrong_author: string;
+// }
+
+// interface ApiResponse {
+//   success: boolean;
+//   data: ErrorBankItem[];
+//   totalPages: number;
+// }
+
+// // 模态框组件
+// const ErrorDetailModal = ({ errorItem, onClose }: { errorItem: ErrorBankItem; onClose: () => void }) => {
+//   if (!errorItem) return null; // 如果没有选中的错题，不渲染模态框
+
+//   return (
+//     <div className="modal">
+//       <div className="modal-content">
+//         <span className="close" onClick={onClose}>&times;</span>
+//         <h2>错题详情</h2>
+//         <p><strong>错题名称:</strong> {errorItem.Wrong_name}</p>
+//         <p><strong>错题内容:</strong> {errorItem.Wrong_content}</p>
+//         <p><strong>错题类型:</strong> {errorItem.Wrong_type}</p>
+//         <p><strong>错题文件:</strong> {errorItem.Wrong_file}</p>
+//         <p><strong>错题作者:</strong> {errorItem.Wrong_author}</p>
+//       </div>
+//     </div>
+//   );
+// };
+
+// const ErrorBankPage: React.FC = () => {
+//   const [errorBankData, setErrorBankData] = useState<ErrorBankItem[]>([]);
+//   const [error, setError] = useState<string | null>(null);
+//   const [currentPage, setCurrentPage] = useState<number>(1);
+//   const [totalPages, setTotalPages] = useState<number>(0);
+//   const [limit] = useState<number>(8); // 每页显示的记录数
+//   const [name, setSearchTerm] = useState<string>(''); // 新增搜索状态
+
+//   useEffect(() => {
+//     fetchData();
+//   }, [currentPage, limit, name]);
+
+//   const fetchData = async () => {
+//     try {
+//       let url = `http://localhost:3000/errorbank`;
+//       let params: any = { page: currentPage, limit: limit };
+
+//       if (name.trim() !== '') {
+//         // 如果搜索框不为空，则请求特定的搜索URL，并将搜索词作为URL的一部分
+//         url = `http://localhost:3000/errorbank/zong/${name}`;
+//       }
+
+//       const response = await axios.get<ApiResponse>(url, {
+//         params: params,
+//       });
+
+//       if (!response.data.success) {
+//         throw new Error('Request failed');
+//       }
+
+//       setErrorBankData(response.data.data);
+//       setTotalPages(response.data.totalPages);
+//       setError(null);
+//     } catch (err: unknown) {
+//       const typedError = err as AxiosError;
+//       setError(typedError.message || 'An error occurred while fetching data.');
+//     }
+//   };
+
+//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+//   const [selectedErrorItem, setSelectedErrorItem] = useState<ErrorBankItem | null>(null);
+
+//   // 打开模态框的函数
+//   const openModal = (errorItem: ErrorBankItem) => {
+//     setSelectedErrorItem(errorItem);
+//     setIsModalOpen(true);
+//   };
+
+//   // 关闭模态框的函数
+//   const closeModal = () => {
+//     setIsModalOpen(false);
+//     setSelectedErrorItem(null);
+//   };
+
+//   const handlePageChange = (newPage: number) => {
+//     setCurrentPage(newPage);
+//   };
+
+//   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     setSearchTerm(e.target.value);
+//     setCurrentPage(1); // 当搜索词改变时，重置页码为1
+//   };
+
+//   const handleSubmitSearch = (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+//     setCurrentPage(1); // 提交搜索时，重置页码为1
+//   };
+
+//   if (error) return <div>Error: {error}</div>;
+
+//   return (
+//     <div className={styles.container}>
+//       <Home /> {/* 假设这是你的侧边栏组件 */}
+//       <div className={styles.content}>
+//         <h1>Error Bank Data</h1>
+//         <form 
+//           onSubmit={handleSubmitSearch} 
+//           className={styles.searchForm}
+//         >
+//           <input
+//             type="text"
+//             placeholder="Search by name..."
+//             value={name}
+//             onChange={handleSearchInputChange}
+//             className={styles.searchInput}
+//           />
+//           <button type="submit" className={styles.searchButton}>
+//             Search
+//           </button>
+//         </form>
+//         {error && <div className={styles.error}>{error}</div>}
+//         <table className={styles.errorBankTable}>
+//           <thead>
+//             <tr>
+//               <th>Wrong Name</th>
+//               <th>Wrong Type</th>
+//               <th>Wrong Author</th>
+//               {/* 根据需要添加或删除列 */}
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {errorBankData.map((item, index) => (
+//               <tr 
+//                 key={index} 
+//                 className={styles.tableRow}
+//                 onClick={() => openModal(item)}
+//               >
+//                 <td>{item.Wrong_name}</td>
+//                 <td>{item.Wrong_type}</td>
+//                 <td>{item.Wrong_author}</td>
+//                 {/* 根据需要添加或删除单元格 */}
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//         {isModalOpen && (
+//           <div className={styles.modal}>
+//             <div className={styles.modalContent}>
+//               <span className={styles.close} onClick={closeModal}>
+//                 &times;
+//               </span>
+//               <h2>错题详情</h2>
+//               <p><strong>错题名称:</strong> {selectedErrorItem?.Wrong_name}</p>
+//               <p><strong>错题内容:</strong> {selectedErrorItem?.Wrong_content}</p>
+//               <p><strong>错题类型:</strong> {selectedErrorItem?.Wrong_type}</p>
+//               <p><strong>错题文件:</strong> {selectedErrorItem?.Wrong_file}</p>
+//               <p><strong>错题作者:</strong> {selectedErrorItem?.Wrong_author}</p>
+//             </div>
+//           </div>
+//         )}
+//         <div className={styles.pagination}>
+//           <button 
+//             disabled={currentPage === 1} 
+//             onClick={() => handlePageChange(currentPage - 1)} 
+//             className={styles.paginationButton}
+//           >
+//             上一页
+//           </button>
+//           <span>当前页面: {currentPage} / {totalPages}</span>
+//           <button 
+//             disabled={currentPage === totalPages} 
+//             onClick={() => handlePageChange(currentPage + 1)} 
+//             className={styles.paginationButton}
+//           >
+//             下一页
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default ErrorBankPage;

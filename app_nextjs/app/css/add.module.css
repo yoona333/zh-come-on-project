@@ -1,0 +1,84 @@
+/* AddErrorPage.module.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.content {
+  width: 100%;
+  max-width: 800px;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-field,
+.textarea-field {
+  font-size: 16px;
+  color: #333;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border: 2px solid #e1e1e1;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.input-field:focus,
+.textarea-field:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.textarea-field {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.submit-button {
+  font-size: 18px;
+  background-color: #007bff;
+  color: white;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.submit-button:active {
+  transform: scale(0.98); /* Slightly scale down button when clicked */
+}
+
+/* 添加一些响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .input-field,
+  .textarea-field {
+    padding: 10px 15px;
+  }
+
+  .submit-button {
+    padding: 10px 15px;
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Authentication</title>
+    <style>
+        body {font-family: Arial, sans-serif;}
+        form {margin-bottom: 20px;}
+        label {display: block;margin-bottom: 5px;}
+        input {display: block;margin-bottom: 10px;padding: 5px;width: 200px;}
+        button {padding: 5px 10px;}
+    </style>
+</head>
+<body>
+    <h2>Register</h2>
+    <form id="registerForm">
+        <label for="registerUsername">Username:</label>
+        <input type="text" id="registerUsername" required>
+        <label for="registerPassword">Password:</label>
+        <input type="password" id="registerPassword" required>
+        <button type="submit">Register</button>
+    </form>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert('出错啦'));
+        });
+    </script>
+</body>
+</html>
