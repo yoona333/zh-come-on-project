@@ -1,86 +1,36 @@
-"use client";
-
 import React from 'react';
-import Link from 'next/link';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 import './style.css';
+import { AntdProvider } from './providers';
 
-interface NavLink {
-  name: string;
-  href: string;
-  subLinks?: Array<{
-    name: string;
-    href: string;
-  }>;
-}
+const inter = Inter({ subsets: ['latin'] });
 
-interface RootLayoutProps {
-  children?: React.ReactNode;
-}
+export const metadata: Metadata = {
+  title: '攒劲Π校内活动积分系统',
+  description: '校内社团活动管理与积分系统',
+};
 
-class RootLayout extends React.Component<RootLayoutProps, { activeDropdown: string | null }> {
-  constructor(props: RootLayoutProps) {
-    super(props);
-    this.state = {
-      activeDropdown: null,
-    };
-  }
-
-  toggleDropdown = (linkHref: string) => {
-    this.setState((prevState) => ({
-      activeDropdown: prevState.activeDropdown === linkHref ? null : linkHref,
-    }));
-  }
-
-  render() {
-    const { children } = this.props;
-    const { activeDropdown } = this.state;
-    const navLinks: NavLink[] = [
-      // ... your nav links with subLinks
-    ];
-
-    return (
-      <html lang="zh">
-        <head>
-          <title>我的网站</title>
-          <meta charSet="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        </head>
-        <body>
-          <nav>
-            {navLinks.map((link) => {
-              const dropdownActive = activeDropdown === link.href;
-              return (
-                <div key={link.name} className="nav-item">
-                  <button
-                    className="nav-link"
-                    onClick={() => this.toggleDropdown(link.href)}
-                  >
-                    {link.name}
-                  </button>
-                  {dropdownActive && (
-                    <div className="dropdown">
-                      {link.subLinks &&
-                        link.subLinks.map((subLink, index) => (
-                          <div key={index}>
-                            <Link href={subLink.href} key={subLink.name}>
-                              <a>{subLink.name}</a>
-                            </Link>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="zh-CN">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
+      <body className={inter.className}>
+        <AntdProvider>
           {children}
-        </body>
-      </html>
-    );
-  }
+        </AntdProvider>
+      </body>
+    </html>
+  );
 }
 
-export default RootLayout;
 // "use client";
 
 // // home.tsx

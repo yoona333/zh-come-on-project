@@ -1,0 +1,101 @@
+@import './theme.scss';
+
+.adminPage {
+  h2 {
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: $heading-color;
+    font-size: 24px;
+  }
+  
+  .statsRow {
+    margin-bottom: 24px;
+    
+    :global {
+      .ant-card {
+        box-shadow: $box-shadow-card;
+        border-radius: 8px;
+        transition: transform 0.3s $ease-out;
+        
+        &:hover {
+          transform: translateY(-5px);
+        }
+        
+        .ant-statistic-title {
+          color: $text-color-secondary;
+          font-size: $font-size-base;
+          margin-bottom: 8px;
+        }
+        
+        .ant-statistic-content {
+          color: $heading-color;
+          font-size: 28px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .tableCard {
+    box-shadow: $box-shadow-card;
+    border-radius: 8px;
+    margin-bottom: 24px;
+  }
+  
+  .searchForm {
+    margin-bottom: 24px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: $box-shadow-card;
+    
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      
+      button {
+        margin-left: 8px;
+      }
+    }
+  }
+  
+  .actionColumn {
+    display: flex;
+    justify-content: space-between;
+    
+    button {
+      margin-right: 8px;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+  
+  .batchActions {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .statusTag {
+    &.pending {
+      color: $warning-color;
+      background-color: rgba($warning-color, 0.1);
+      border-color: rgba($warning-color, 0.3);
+    }
+    
+    &.approved {
+      color: $success-color;
+      background-color: rgba($success-color, 0.1);
+      border-color: rgba($success-color, 0.3);
+    }
+    
+    &.rejected {
+      color: $error-color;
+      background-color: rgba($error-color, 0.1);
+      border-color: rgba($error-color, 0.3);
+    }
+  }
+} 

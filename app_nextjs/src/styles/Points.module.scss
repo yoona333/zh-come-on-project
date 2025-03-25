@@ -1,0 +1,140 @@
+@import './theme.scss';
+
+.pointsPage {
+  h2 {
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: $heading-color;
+    font-size: 24px;
+  }
+  
+  .statsRow {
+    margin-bottom: 24px;
+    
+    :global {
+      .ant-card {
+        box-shadow: $box-shadow-card;
+        border-radius: 8px;
+        transition: transform 0.3s $ease-out;
+        
+        &:hover {
+          transform: translateY(-5px);
+        }
+        
+        .ant-statistic-title {
+          color: $text-color-secondary;
+          font-size: $font-size-base;
+          margin-bottom: 8px;
+        }
+        
+        .ant-statistic-content {
+          color: $heading-color;
+          font-size: 28px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .percentile {
+    margin-top: 8px;
+    color: $success-color;
+    font-size: 13px;
+  }
+  
+  .monthGrowth {
+    margin-top: 8px;
+    color: $success-color;
+    font-size: 13px;
+  }
+  
+  .contentRow {
+    margin-bottom: 24px;
+  }
+  
+  .historyTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    @media (max-width: 576px) {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      :global {
+        .ant-picker-range {
+          margin-left: 0 !important;
+          margin-top: 12px;
+          width: 100%;
+        }
+      }
+    }
+  }
+  
+  .historyCard {
+    box-shadow: $box-shadow-card;
+    border-radius: 8px;
+    
+    :global {
+      .ant-list-item {
+        padding: 12px 0;
+      }
+      
+      .ant-list-item-meta-title {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  .pointsEarned {
+    font-weight: 600;
+    color: $success-color;
+    font-size: 18px;
+  }
+  
+  .pointsSpent {
+    font-weight: 600;
+    color: $error-color;
+    font-size: 18px;
+  }
+  
+  .redeemCard {
+    box-shadow: $box-shadow-card;
+    border-radius: 8px;
+    
+    :global {
+      .ant-card-grid {
+        box-shadow: none;
+        padding: 16px;
+      }
+    }
+  }
+  
+  .redeemOption {
+    width: 100%;
+    transition: all 0.3s;
+    
+    &:hover {
+      background-color: $background-color-light;
+    }
+  }
+  
+  .redeemName {
+    font-weight: 600;
+    color: $heading-color;
+    margin-bottom: 8px;
+  }
+  
+  .redeemPoints {
+    color: $primary-color;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  
+  .redeemDescription {
+    color: $text-color-secondary;
+    font-size: 13px;
+    margin-bottom: 12px;
+    height: 40px;
+  }
+} 

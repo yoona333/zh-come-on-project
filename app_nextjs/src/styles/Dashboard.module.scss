@@ -1,0 +1,173 @@
+@import './theme.scss';
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - #{$header-height});
+  background-color: #f0f2f5;
+}
+
+.dashboard {
+  padding: 24px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - #{$header-height});
+}
+
+.welcomeTitle {
+  margin-bottom: 24px !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leaderTag {
+  margin-left: 12px;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.contentRow {
+  margin-bottom: 24px;
+}
+
+.pendingCard, .rankingCard {
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+.cardTitleWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.activityTag {
+  margin-left: 8px;
+}
+
+.rankingTable {
+  :global {
+    .ant-table-tbody > tr > td {
+      padding: 12px 8px;
+    }
+  }
+}
+
+.rankCell {
+  text-align: center;
+}
+
+.rankBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-weight: bold;
+  color: white;
+}
+
+.rank1 {
+  background-color: #ffd700;
+}
+
+.rank2 {
+  background-color: #c0c0c0;
+}
+
+.rank3 {
+  background-color: #cd7f32;
+}
+
+.pointsCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pointsValue {
+  min-width: 40px;
+}
+
+.pointsProgress {
+  flex: 1;
+}
+
+.actionRow {
+  margin-bottom: 24px;
+}
+
+.actionCard {
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.actionContent {
+  text-align: center;
+  padding: 24px;
+}
+
+.actionIcon {
+  font-size: 32px;
+  color: $primary-color;
+  margin-bottom: 16px;
+}
+
+.actionTitle {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.actionDesc {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.leaderCard {
+  margin-top: 24px;
+}
+
+.leaderActionCard {
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.leaderActionContent {
+  text-align: center;
+  padding: 16px;
+}
+
+.leaderActionIcon {
+  font-size: 24px;
+  color: $primary-color;
+  margin-bottom: 8px;
+} 

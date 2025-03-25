@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import Home from '../homedaohan/page'; // 引入Sidebar组件
 import ErrorDetailModal from '../css/ErrorDetailModal'; // 引入模态框组件
-import styles from '../css/ErrorBankPage.module.css'; // 引入样式
+import styles from './ErrorBankPage.module.css'; // 修改这一行
 import withAuthentication from '../api/jwt';
 
 // 定义API响应的类型
@@ -41,7 +41,7 @@ const ErrorBankPage: React.FC = () => {
   const fetchData = async () => {
     try {
       // 根据搜索框中是否有数据来构造URL
-      let url = 'http://localhost:3000/errorbank';
+      let url = 'http://localhost:3001/errorbank';
       if (name) {
         url += `/zong/${encodeURIComponent(name)}`;
       }

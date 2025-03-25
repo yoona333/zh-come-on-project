@@ -8,7 +8,7 @@ export type UserCredentials = {
 };
 
 // 基础URL
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3001';
 
 // 注册用户
 export const registerUser = (credentials: UserCredentials) => {

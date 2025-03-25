@@ -1,0 +1,134 @@
+/* 布局样式 */
+.app-layout {
+  min-height: 100vh;
+}
+
+/* 头部样式 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+  height: 64px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.trigger {
+  font-size: 18px;
+  margin-right: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  margin-right: 8px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.icon-button {
+  font-size: 18px;
+  margin-right: 16px;
+}
+
+.notification-badge {
+  margin-right: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.user-info:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.avatar {
+  margin-right: 8px;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 64px;
+  overflow: auto;
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+  z-index: 999;
+}
+
+.side-menu {
+  height: calc(100vh - 64px);
+  border-right: 0;
+}
+
+/* 内容区域样式 */
+.content {
+  margin-left: 220px;
+  margin-top: 64px;
+  padding: 24px;
+  transition: all 0.2s;
+}
+
+.content-collapsed {
+  margin-left: 80px;
+}
+
+.content-wrapper {
+  background: #fff;
+  padding: 24px;
+  min-height: calc(100vh - 112px);
+  border-radius: 4px;
+}
+
+/* 仪表盘样式 */
+.dashboard h2 {
+  margin-bottom: 24px;
+}
+
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.view-more-container {
+  text-align: center;
+  margin-top: 24px;
+} 

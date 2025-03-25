@@ -1,0 +1,220 @@
+@import './theme.scss';
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+}
+
+.loginWrapper {
+  display: flex;
+  width: 900px;
+  max-width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.loginLeft {
+  flex: 1;
+  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 15%) 100%);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+  }
+}
+
+.logoContainer {
+  text-align: center;
+}
+
+.logo {
+  margin-bottom: 20px;
+}
+
+.systemTitle {
+  color: white !important;
+  margin-bottom: 10px !important;
+  font-weight: 600 !important;
+  
+  @media (max-width: 768px) {
+    font-size: 20px !important;
+  }
+}
+
+.systemSlogan {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+}
+
+.loginCard {
+  flex: 1;
+  padding: 20px;
+  border-radius: 0;
+  
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
+}
+
+.loginTitle {
+  text-align: center;
+  margin-bottom: 30px !important;
+  color: $primary-color !important;
+}
+
+.loginForm {
+  max-width: 100%;
+}
+
+.roleSelector {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.roleButtons {
+  width: 100%;
+  
+  :global(.ant-radio-button-wrapper) {
+    width: 50%;
+    text-align: center;
+  }
+}
+
+.input {
+  height: 50px;
+  border-radius: 6px;
+}
+
+.inputIcon {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.loginButton {
+  height: 50px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.loginFooter {
+  text-align: center;
+  margin-top: 16px;
+  
+  a {
+    color: $primary-color;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.loginFooterText {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background-size: cover;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/images/pattern.png');
+    opacity: 0.05;
+    z-index: 0;
+  }
+}
+
+.loginBox {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 600 !important;
+  letter-spacing: 1px;
+}
+
+.loginCard {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+  
+  :global {
+    .ant-card-body {
+      padding: 32px !important;
+    }
+    
+    .ant-form-item-label > label {
+      font-weight: 500;
+    }
+    
+    .ant-input-affix-wrapper {
+      padding: 12px;
+      border-radius: 6px;
+    }
+    
+    .ant-input-affix-wrapper-focused {
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
+    
+    .ant-btn {
+      height: 45px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 16px;
+      box-shadow: 0 2px 6px rgba($primary-color, 0.4);
+    }
+  }
+}
+
+.forgotPassword {
+  color: $primary-color;
+  float: right;
+  
+  &:hover {
+    color: $primary-color-dark;
+  }
+} 

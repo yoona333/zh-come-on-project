@@ -4,59 +4,102 @@
 import React, { useState } from 'react'; // 导入React和useState钩子
 import axios from 'axios'; // 导入axios用于发送HTTP请求
 import "../css/login.css";
+import { Card, Form, Input, Button, Checkbox, Typography, message } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import styles from '../../src/styles/Login.module.scss';
 // import Home from '../homedaohan/page'; // 引入Sidebar组件
 
+const { Title } = Typography;
 
 const LoginPage = () => {
-  const [username, setUsername] = useState(''); 
-  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  // 定义handleSubmit函数，处理表单提交事件
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onFinish = async (values: any) => {
+    setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/login', {
-        username,
-        password,
-      });
+      // 这里应该是实际的登录API调用
+      console.log('登录信息:', values);
       
-      console.log('Response from server:', response);
-      if (response.data.auth) {
-        // 将token存储到localStorage
-        localStorage.setItem('token', response.data.token);
+      // 模拟登录成功
+      setTimeout(() => {
+        setLoading(false);
+        message.success('登录成功！');
         
-        // 使用window.location.href进行页面跳转
-        window.location.href = '/home';
-      }
+        // 根据角色重定向到不同页面
+        if (values.username === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/student');
+        }
+      }, 1000);
     } catch (error) {
-      console.error('登录失败:', error);
-      alert('登录失败，请重试！');
+      setLoading(false);
+      message.error('登录失败，请检查用户名和密码');
     }
   };
 
-  return (
-    <div>
-          {/* <Home /> */}
-    <form onSubmit={handleSubmit}>
-      <h1>登录</h1>
-      <input
-        type="text"
-        placeholder="用户名"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="密码"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">登录</button>
-    </form>
-    </div>
+  const handleForgotPassword = () => {
+    message.info('忘记密码功能正在开发中...');
+  };
 
+  return (
+    <div className={styles.loginContainer}>
+      <div className={styles.loginBox}>
+        <div className={styles.logoContainer}>
+          <img src="/images/logo.png" alt="攒劲Π" className={styles.logo} />
+          <Title level={2} className={styles.title}>攒劲Π校内活动积分系统</Title>
+        </div>
+        
+        <Card className={styles.loginCard}>
+          <Form
+            name="login"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
+            size="large"
+          >
+            <Form.Item
+              name="username"
+              rules={[{ required: true, message: '请输入用户名!' }]}
+            >
+              <Input prefix={<UserOutlined />} placeholder="用户名" />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: '请输入密码!' }]}
+            >
+              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+            </Form.Item>
+
+            <Form.Item>
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox>记住我</Checkbox>
+              </Form.Item>
+
+              <Link 
+                href="/forgot-password" 
+                className={styles.forgotPassword}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleForgotPassword();
+                }}
+              >
+                忘记密码
+              </Link>
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading} block>
+                登录
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
+    </div>
   );
 };
 

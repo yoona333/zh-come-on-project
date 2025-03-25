@@ -1,0 +1,148 @@
+@import './theme.scss';
+
+.profilePage {
+  h2 {
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: $heading-color;
+    font-size: 24px;
+  }
+  
+  .avatarCard {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: $box-shadow-card;
+    text-align: center;
+    overflow: hidden;
+  }
+  
+  .avatarContainer {
+    padding: 24px 0;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(to right, $primary-color-light, $primary-color-dark);
+      z-index: 0;
+    }
+  }
+  
+  .avatar {
+    position: relative;
+    z-index: 1;
+    border: 4px solid #fff;
+    margin-bottom: 16px;
+  }
+  
+  .uploadButton {
+    position: absolute;
+    bottom: 0;
+    right: calc(50% - 60px);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: $primary-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: $box-shadow-base;
+    
+    &:hover {
+      background: $primary-color-dark;
+    }
+  }
+  
+  .userInfo {
+    padding: 0 24px 24px;
+    
+    h3 {
+      margin-bottom: 4px;
+      color: $heading-color;
+    }
+    
+    p {
+      color: $text-color-secondary;
+      margin-bottom: 16px;
+    }
+    
+    .infoItem {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      color: $text-color;
+      
+      .icon {
+        margin-right: 8px;
+        color: $text-color-secondary;
+      }
+    }
+  }
+  
+  .infoCard {
+    border-radius: 8px;
+    box-shadow: $box-shadow-card;
+    margin-bottom: 24px;
+    
+    :global {
+      .ant-tabs-nav {
+        margin-bottom: 16px;
+      }
+    }
+  }
+  
+  .formSection {
+    margin-bottom: 16px;
+    
+    h3 {
+      margin-bottom: 16px;
+      font-weight: 500;
+      font-size: 16px;
+      color: $heading-color;
+    }
+  }
+  
+  .actionButtons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    
+    button {
+      margin-left: 8px;
+    }
+  }
+  
+  .achievementsList {
+    :global {
+      .ant-list-item {
+        padding: 16px;
+        border-radius: 8px;
+        background: $background-color-light;
+        margin-bottom: 12px;
+        transition: transform 0.3s;
+        
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: $box-shadow-base;
+        }
+      }
+    }
+  }
+  
+  .achievementIcon {
+    font-size: 24px;
+    margin-right: 12px;
+  }
+  
+  .clubsMeta {
+    display: flex;
+    justify-content: space-between;
+  }
+} 

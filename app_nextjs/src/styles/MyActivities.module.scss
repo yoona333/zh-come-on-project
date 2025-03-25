@@ -1,0 +1,66 @@
+@import './theme.scss';
+
+.myActivitiesPage {
+  h2 {
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: $heading-color;
+    font-size: 24px;
+  }
+  
+  .activitiesTabs {
+    :global {
+      .ant-tabs-nav {
+        margin-bottom: 24px;
+      }
+    }
+  }
+  
+  .activitiesList {
+    background-color: transparent;
+  }
+  
+  .activityCard {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: $box-shadow-base;
+    transition: transform 0.3s $ease-out;
+    
+    &:hover {
+      transform: translateY(-5px);
+    }
+    
+    :global {
+      .ant-list-item {
+        padding: 16px 20px;
+      }
+    }
+  }
+  
+  .activityTitle {
+    font-weight: 600;
+    font-size: 18px;
+    color: $heading-color;
+    display: flex;
+    align-items: center;
+    
+    :global {
+      .ant-tag {
+        margin-left: 8px;
+      }
+    }
+  }
+  
+  .activityInfo {
+    p {
+      margin-bottom: 6px;
+    }
+  }
+  
+  .activityBadge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+} 
