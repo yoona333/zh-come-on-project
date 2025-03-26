@@ -20,29 +20,30 @@ const LoginPage = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      // 这里应该是实际的登录API调用
-      console.log('登录信息:', values);
-      
-      // 模拟登录成功
-      setTimeout(() => {
-        setLoading(false);
+      // 实际的登录API调用
+      const response = await axios.post('http://localhost:3001/login', values);
+      const data = response.data;
+      setLoading(false);
+      if (data.success) {
         message.success('登录成功！');
-        
-        // 根据角色重定向到不同页面
-        if (values.username === 'admin') {
+        if (data.role === 0) {
           router.push('/admin');
         } else {
           router.push('/student');
         }
-      }, 1000);
+      } else {
+        message.error(data.message || '登录失败，请检查用户名和密码');
+      }
     } catch (error) {
       setLoading(false);
-      message.error('登录失败，请检查用户名和密码');
+      message.error('登录失败，请检查网络或稍后重试');
     }
   };
 
   const handleForgotPassword = () => {
-    message.info('忘记密码功能正在开发中...');
+    // 使用 router.push 直接跳转到忘记密码页面
+    // message.info('忘记密码功能正在开发中...');
+    router.push('/ForgotPassword'); 
   };
 
   return (

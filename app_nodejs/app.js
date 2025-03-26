@@ -51,31 +51,117 @@ connection.connect(err => {
 });
 
 
- app.post("/login", (req, res) => {
+//  app.post("/login", (req, res) => {
+//   const { username, password } = req.body;
+//   if (!username || !password) {
+//     return res.status(400).send("用户名和密码为必填项.");
+//   }
+
+//    const query = "SELECT * FROM users WHERE username = ?";
+//    connection.query(query, [username], (err, results) => {
+//      if (err) {
+//        console.error("从数据库提取用户时出错:", err);
+//       return res.status(500).send("登录时出错.");
+//     }
+//     if (results.length === 0) {
+//       return res.status(404).send("未找到用户.");
+//     }
+//      const user = results[0];
+//     const passwordIsValid = password === user.password;
+//      if (!passwordIsValid) {
+//       return res.status(401).send("密码无效。");
+//     }
+
+//     const token = jwt.sign({ id: user.id }, secret, { expiresIn: 86400 });
+//     res.status(200).send({ success: true, token });
+//    });
+//  });
+
+app.post("/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).send("用户名和密码为必填项.");
   }
 
-   const query = "SELECT * FROM users WHERE username = ?";
-   connection.query(query, [username], (err, results) => {
-     if (err) {
-       console.error("从数据库提取用户时出错:", err);
+  // 修改查询语句，加入 role 字段
+  const query = "SELECT id, password, role FROM users WHERE username = ?";
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("从数据库提取用户时出错:", err);
       return res.status(500).send("登录时出错.");
     }
     if (results.length === 0) {
       return res.status(404).send("未找到用户.");
     }
-     const user = results[0];
+    const user = results[0];
     const passwordIsValid = password === user.password;
-     if (!passwordIsValid) {
+    if (!passwordIsValid) {
       return res.status(401).send("密码无效。");
     }
 
-    const token = jwt.sign({ id: user.id }, secret, { expiresIn: 86400 });
-    res.status(200).send({ success: true, token });
-   });
- });
+    const token = jwt.sign({ userId: user.id }, secret, { expiresIn: 86400 });
+    // 在响应中加入 role 字段
+    res.status(200).send({ success: true, token, role: user.role });
+    console.log("生成的 token:", token);
+  });
+});
+
+// ... existing code ...
+
+// 处理忘记密码请求的路由
+app.post('/Forgot/password', (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).send("用户名是必填项.");
+  }
+
+  // 更新用户的 is_forgotten 字段为 1
+  const query = "UPDATE users SET is_forgotten = 1 WHERE username = ?";
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("更新用户忘记密码状态时出错:", err);
+      return res.status(500).send("处理忘记密码请求时出错.");
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).send("未找到用户.");
+    }
+    res.status(200).send({ success: true, message: '重置密码申请已提交，请等待处理。' });
+  });
+});
+
+
+// 处理重置密码请求的路由
+// 路由 1: 查看 users 表中的 is_forgotten 为 1 的 username
+app.get('/ischange/password',  (req, res) => {
+  const query = 'SELECT username FROM users WHERE is_forgotten = 1';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('查询忘记密码用户列表失败:', err);
+      return res.status(500).json({ error: '查询忘记密码用户列表失败' });
+    }
+    const usernames = results.map(row => row.username);
+    res.json(usernames);
+  });
+});
+
+// 路由 2: 修改对应的 username 的 is_forgotten 为 0，password 修改为 000000
+app.post('/ischange/password',  (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json({ error: '缺少必要的参数: username' });
+  }
+  const query = 'UPDATE users SET is_forgotten = 0, password = "000000" WHERE username = ?';
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error('重置用户密码失败:', err);
+      return res.status(500).json({ error: '重置用户密码失败' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: '未找到用户' });
+    }
+    res.json({ message: `用户 ${username} 密码重置成功` });
+  });
+});
  
 
 // 使用JWT中间件进行身份验证

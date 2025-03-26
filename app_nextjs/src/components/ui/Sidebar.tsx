@@ -75,6 +75,11 @@ export default function Sidebar({ role, collapsed }: SidebarProps) {
           key: 'activity-stats',
           label: <Link href={`/${role}/activity-stats`}>活动统计</Link>,
         },
+        // 新增修改密码子菜单
+        {
+          key: 'change-password',
+          label: <Link href={`/${role}/change-password`}>修改密码</Link>,
+        },
       ],
     });
   }
