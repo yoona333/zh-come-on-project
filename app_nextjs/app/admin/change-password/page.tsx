@@ -14,54 +14,98 @@ const ChangePasswordPage: React.FC = () => {
   const [message, setMessage] = useState('');
 
   // 获取所有需要修改密码的用户
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/ischange/password');
-        console.log('后端返回的数据:', response.data); // 打印后端返回的数据
-        // 将后端返回的字符串数组转换为 User[] 类型
-        const userList = response.data.map((username: string) => ({ username }));
-        setUsers(userList);
-        setLoading(false);
-      } catch (error) {
-        console.error('获取用户列表失败:', error);
-        setLoading(false);
+// ... existing code ...
+
+// ... existing code ...
+
+// 获取所有需要修改密码的用户
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      // 从浏览器存储中获取 token
+      const token = localStorage.getItem('token'); 
+      if (!token) {
+        console.error('Token not found in local storage');
+        return;
       }
-    };
 
-    fetchUsers();
-  }, []);
-
-  // 单个用户修改密码
-  const handleChangePassword = async (username: string) => {
-    try {
-      await axios.post('http://localhost:3001/ischange/password', {
-        username,
-        newPassword: '000000'
+      const response = await fetch('http://localhost:3001/ischange/password', {
+        headers: {
+          'x-access-token': token, // 将 token 放在请求头中
+          'Content-Type': 'application/json'
+        }
       });
-      setMessage(`用户 ${username} 密码修改成功`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+
+      const data = await response.json();
+      // 将后端返回的字符串数组转换为 User[] 类型
+      const userList = data.map((username: string) => ({ username }));
+      setUsers(userList);
+      setLoading(false);
     } catch (error) {
-      console.error('修改密码失败:', error);
-      setMessage(`用户 ${username} 密码修改失败`);
+      console.error('获取用户列表失败:', error);
+      setLoading(false);
     }
   };
 
-  // 一键修改所有用户密码
-  const handleChangeAllPasswords = async () => {
-    try {
-      const requests = users.map(user =>
-        axios.post('http://localhost:3001/ischange/password', {
-          username: user.username,
-          newPassword: '000000'
-        })
-      );
-      await Promise.all(requests);
-      setMessage('所有用户密码修改成功');
-    } catch (error) {
-      console.error('一键修改密码失败:', error);
-      setMessage('一键修改密码失败');
+  fetchUsers();
+}, []);
+
+// 单个用户修改密码
+const handleChangePassword = async (username: string) => {
+  try {
+    const token = localStorage.getItem('token'); 
+    if (!token) {
+      console.error('Token not found in local storage');
+      return;
     }
-  };
+    await axios.post('http://localhost:3001/ischange/password', {
+      username,
+      newPassword: '000000'
+    }, {
+      headers: {
+        'x-access-token': token, // 传递 token 到后端
+        'Content-Type': 'application/json'
+      }
+    });
+    setMessage(`用户 ${username} 密码修改成功`);
+  } catch (error) {
+    console.error('修改密码失败:', error);
+    setMessage(`用户 ${username} 密码修改失败`);
+  }
+};
+
+// 一键修改所有用户密码
+const handleChangeAllPasswords = async () => {
+  try {
+    const token = localStorage.getItem('token'); 
+    if (!token) {
+      console.error('Token not found in local storage');
+      return;
+    }
+    const requests = users.map(user =>
+      axios.post('http://localhost:3001/ischange/password', {
+        username: user.username,
+        newPassword: '000000'
+      }, {
+        headers: {
+          'x-access-token': token, // 传递 token 到后端
+          'Content-Type': 'application/json'
+        }
+      })
+    );
+    await Promise.all(requests);
+    setMessage('所有用户密码修改成功');
+  } catch (error) {
+    console.error('一键修改密码失败:', error);
+    setMessage('一键修改密码失败');
+  }
+};
+
+// ... existing code ...
 
   return (
     <div className="container">

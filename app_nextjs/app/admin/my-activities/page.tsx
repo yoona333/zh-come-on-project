@@ -19,7 +19,7 @@ const ActivityListPage: React.FC = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:3001/activities', {
+        const response = await fetch('http://localhost:3001/my/activities', {
           headers: {
             'x-access-token': token
           },
@@ -96,14 +96,16 @@ const ActivityListPage: React.FC = () => {
     }
   };
 
-  const handleCancelSignUp = async (activityId: number) => {
+ // ... existing code ...
+
+const handleCancelSignUp = async (activityId: number) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         router.push('/login');
         return;
       }
-
+  
       const response = await fetch(`http://localhost:3001/activities/${activityId}/withdraw`, {
         method: 'POST',
         headers: {
@@ -112,25 +114,27 @@ const ActivityListPage: React.FC = () => {
         },
         body: JSON.stringify({ activityId }) 
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to cancel sign up for the activity');
       }
-
+  
       const newResponse = await fetch('http://localhost:3001/activities', {
         headers: {
           'x-access-token': token
         },
       });
-
+  
       if (!newResponse.ok) {
         throw new Error('Failed to fetch activities');
       }
-
+  
       const newData = await newResponse.json();
       if (Array.isArray(newData.data)) {
         setActivities(newData.data);
         setPopupMessage('退出活动成功！');
+        // 退出活动成功后刷新页面
+        window.location.reload(); 
       } else {
         console.error('Received new data is not an array:', newData);
         setError('Received new data is not in the expected format.');
@@ -143,7 +147,7 @@ const ActivityListPage: React.FC = () => {
       }
     }
   };
-
+  
   return (
     <div className={styles.activityListContainer}> 
       <h1 className={styles.title}>活动列表</h1>

@@ -271,69 +271,203 @@ app.get('/activities', verifyToken, (req, res) => {
   });
 });
 
-// 创建活动
-app.post('/activities', verifyToken, (req, res) => {
-  // 从请求体中获取数据
-  const { title, description, date, location, points, club_id } = req.body;
-  const userId = req.userId; // 从JWT中获取
-  
-  // 验证必填字段
-  if (!title || !date || !club_id) {
-    return res.status(400).json({ success: false, message: '标题、日期和社团ID为必填项' });
-  }
-  
-  // 插入数据
-  const query = `
-    INSERT INTO activities (title, description, date, location, points, club_id, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+// ... existing code ...
+
+// 获取我的活动
+app.get('/my/activities', verifyToken, (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const userId = req.userId; // 从token中获取userid
+
+  // 查询用户报名的活动ID
+  const getActivityIdsQuery = `
+    SELECT activity_id FROM signups WHERE user_id = ?
   `;
-  
-  connection.query(
-    query, 
-    [title, description, date, location, points, club_id, userId],
-    (error, results) => {
-      if (error) {
-        return res.status(500).json({ success: false, message: error.message });
-      }
-      
-      res.status(201).json({
+
+  connection.query(getActivityIdsQuery, [userId], (error, activityIdsResults) => {
+    if (error) {
+      console.error('获取活动ID时出错:', error);
+      return res.status(500).json({ success: false, message: '获取活动ID时出错' });
+    }
+
+    if (activityIdsResults.length === 0) {
+      return res.json({
         success: true,
-        message: '活动创建成功',
-        data: { id: results.insertId }
+        data: [],
+        totalPages: 0,
+        currentPage: page
       });
     }
-  );
+
+    const activityIds = activityIdsResults.map(result => result.activity_id);
+    const placeholders = activityIds.map(() => '?').join(',');
+
+    // 查询活动信息
+    const query = `
+      SELECT a.*, c.name as club_name, u.username as organizer  
+      FROM activities a
+      JOIN clubs c ON a.club_id = c.id
+      JOIN users u ON a.created_by = u.id
+      WHERE a.id IN (${placeholders})
+      ORDER BY a.date DESC
+      LIMIT ?, ?
+    `;
+
+    const countQuery = `SELECT COUNT(*) as total FROM activities WHERE id IN (${placeholders})`;
+
+    const queryParams = [...activityIds, offset, limit];
+    const countQueryParams = [...activityIds];
+
+    connection.query(query, queryParams, (error, results) => {
+      if (error) {
+        console.error('Activities query error:', error);
+        return res.status(500).json({ success: false, message: error.message });
+      }
+
+      connection.query(countQuery, countQueryParams, (err, countResults) => {
+        if (err) {
+          console.error('Count query error:', err);
+          return res.status(500).json({ success: false, message: err.message });
+        }
+
+        const totalPages = Math.ceil(countResults[0].total / limit);
+
+        console.log('Returning activities data:', results);
+
+        res.json({
+          success: true,
+          data: results,
+          totalPages: totalPages,
+          currentPage: page
+        });
+      });
+    });
+  });
 });
+
+// ... existing code ...
+
+
+// 创建活动
+app.post('/activities', verifyToken, (req, res) => {
+  const userId = req.userId; // 从 JWT 中获取
+
+  // 通过 userId 获取对应的 role
+  const getRoleQuery = 'SELECT role FROM users WHERE id = ?';
+  connection.query(getRoleQuery, [userId], (err, results) => {
+    if (err) {
+      console.error('从数据库获取用户角色时出错:', err);
+      return res.status(500).send('获取用户角色时出错.');
+    }
+    if (results.length === 0) {
+      return res.status(404).send('未找到用户.');
+    }
+    const userRole = results[0].role;
+
+    // 检查 role 是否为 0
+    if (userRole!== 0) {
+      return res.status(403).json({ success: false, message: '用户角色不为 0，无权限创建活动' });
+    }
+
+    // 从请求体中获取数据，新增 tags 和 contact 字段
+    const { title, description, date, location, points, club_id, tags, contact, participant_count_max } = req.body;
+
+    // 验证必填字段
+    if (!title || !date || !club_id) {
+      return res.status(400).json({ success: false, message: '标题、日期和社团 ID 为必填项' });
+    }
+
+    // 插入数据，新增 tags 和 contact 字段
+    const query = `
+      INSERT INTO activities (title, description, date, location, points, club_id, created_by, tags, contact, participant_count_max)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    connection.query(
+      query, 
+      [title, description, date, location, points, club_id, userId, tags, contact,participant_count_max],
+      (error, results) => {
+        if (error) {
+          return res.status(500).json({ success: false, message: error.message });
+        }
+
+        res.status(201).json({
+          success: true,
+          message: '活动创建成功',
+          data: { id: results.insertId }
+        });
+      }
+    );
+  });
+});
+
+// ... existing code ...
+
+// ... existing code ...
 
 // 参加活动
 app.post('/activities/:activityId/signup', verifyToken, (req, res) => {
   const activityId = req.params.activityId;
   const userId = req.userId; // 从 JWT 中获取用户 ID
 
-  // 检查用户是否已经报名该活动
-  const checkQuery = 'SELECT * FROM signups WHERE activity_id = ? AND user_id = ?';
-  connection.query(checkQuery, [activityId, userId], (checkError, checkResults) => {
-    if (checkError) {
-      console.error('检查用户报名状态时出错:', checkError);
-      return res.status(500).json({ success: false, message: '检查报名状态时出错' });
+  // 先查询活动的最大参与人数和当前参与人数
+  const queryActivity = 'SELECT participant_count_max, participant_count FROM activities WHERE id = ?';
+  connection.query(queryActivity, [activityId], (activityError, activityResults) => {
+    if (activityError) {
+      console.error('查询活动信息时出错:', activityError);
+      return res.status(500).json({ success: false, message: '查询活动信息时出错' });
     }
 
-    if (checkResults.length > 0) {
-      return res.status(400).json({ success: false, message: '您已经报名了这个活动' });
+    if (activityResults.length === 0) {
+      return res.status(404).json({ success: false, message: '未找到该活动' });
     }
 
-    // 插入报名记录
-    const insertQuery = 'INSERT INTO signups (activity_id, user_id) VALUES (?, ?)';
-    connection.query(insertQuery, [activityId, userId], (insertError, insertResults) => {
-      if (insertError) {
-        console.error('报名活动时出错:', insertError);
-        return res.status(500).json({ success: false, message: '报名活动时出错' });
+    const { participant_count_max, participant_count } = activityResults[0];
+
+    // 检查是否达到最大参与人数
+    if (participant_count >= participant_count_max) {
+      return res.status(400).json({ success: false, message: '该活动已达到最大参与人数，无法报名' });
+    }
+
+    // 检查用户是否已经报名该活动
+    const checkQuery = 'SELECT * FROM signups WHERE activity_id = ? AND user_id = ?';
+    connection.query(checkQuery, [activityId, userId], (checkError, checkResults) => {
+      if (checkError) {
+        console.error('检查用户报名状态时出错:', checkError);
+        return res.status(500).json({ success: false, message: '检查报名状态时出错' });
       }
 
-      res.json({ success: true, message: '报名成功' });
+      if (checkResults.length > 0) {
+        return res.status(400).json({ success: false, message: '您已经报名了这个活动' });
+      }
+
+      // 插入报名记录
+      const insertQuery = 'INSERT INTO signups (activity_id, user_id) VALUES (?, ?)';
+      connection.query(insertQuery, [activityId, userId], (insertError, insertResults) => {
+        if (insertError) {
+          console.error('报名活动时出错:', insertError);
+          return res.status(500).json({ success: false, message: '报名活动时出错' });
+        }
+
+        // 更新活动的参与人数
+        const updateQuery = 'UPDATE activities SET participant_count = participant_count + 1 WHERE id = ?';
+        connection.query(updateQuery, [activityId], (updateError, updateResults) => {
+          if (updateError) {
+            console.error('更新活动参与人数时出错:', updateError);
+            return res.status(500).json({ success: false, message: '更新活动参与人数时出错' });
+          }
+
+          res.json({ success: true, message: '报名成功' });
+        });
+      });
     });
   });
 });
+
+// ... existing code ...
+
+// ... existing code ...
 
 // 退出活动
 app.post('/activities/:activityId/withdraw', verifyToken, (req, res) => {
@@ -360,10 +494,21 @@ app.post('/activities/:activityId/withdraw', verifyToken, (req, res) => {
         return res.status(500).json({ success: false, message: '退出活动时出错' });
       }
 
-      res.json({ success: true, message: '退出活动成功' });
+      // 若删除报名记录成功，将活动的参与人数减一
+      const updateQuery = 'UPDATE activities SET participant_count = participant_count - 1 WHERE id = ?';
+      connection.query(updateQuery, [activityId], (updateError, updateResults) => {
+        if (updateError) {
+          console.error('更新活动参与人数时出错:', updateError);
+          return res.status(500).json({ success: false, message: '更新活动参与人数时出错' });
+        }
+
+        res.json({ success: true, message: '退出活动成功' });
+      });
     });
   });
 });
+
+// ... existing code ...
 
 
 
