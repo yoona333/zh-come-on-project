@@ -50,6 +50,52 @@ connection.connect(err => {
     console.log('mysql 数据库连接成功');
 });
 
+// 使用JWT中间件进行身份验证
+// const verifyToken = (req, res, next) => {
+//   const token = req.headers['x-access-token'];
+//   if (!token) {
+//     return res.status(401).json({ message: 'No token provided.' });
+//   }
+
+//   jwt.verify(token, secret, (err, decoded) => {
+//     if (err) {
+//       return res.status(401).json({ message: 'Token is invalid or expired.' });
+//     }
+
+//     // 确保JWT中包含userId字段
+//     if (!decoded.userId) {
+//       return res.status(401).json({ message: 'User ID not found in token.' });
+//     }
+
+//     // 将用户ID设置在请求对象上
+//     req.userId = decoded.userId;
+//     // console.log("req.userId:", req.userId);
+//     next();
+//   });
+// };
+
+const verifyToken = (req, res, next) => {
+  const token = req.headers['x-access-token'];
+  console.log('Received token:', token); // 添加日志
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided.' });
+  }
+
+  jwt.verify(token, secret, (err, decoded) => {
+    if (err) {
+      console.error('Token verification error:', err); // 添加日志
+      return res.status(401).json({ message: 'Token is invalid or expired.' });
+    }
+
+    if (!decoded.userId) {
+      return res.status(401).json({ message: 'User ID not found in token.' });
+    }
+
+    req.userId = decoded.userId;
+    next();
+  });
+};
+
 
 //  app.post("/login", (req, res) => {
 //   const { username, password } = req.body;
@@ -109,7 +155,7 @@ app.post("/login", (req, res) => {
 // ... existing code ...
 
 // 处理忘记密码请求的路由
-app.post('/Forgot/password', (req, res) => {
+app.post('/Forgot/password' ,(req, res) => {
   const { username } = req.body;
   if (!username) {
     return res.status(400).send("用户名是必填项.");
@@ -132,7 +178,7 @@ app.post('/Forgot/password', (req, res) => {
 
 // 处理重置密码请求的路由
 // 路由 1: 查看 users 表中的 is_forgotten 为 1 的 username
-app.get('/ischange/password',  (req, res) => {
+app.get('/ischange/password',verifyToken,  (req, res) => {
   const query = 'SELECT username FROM users WHERE is_forgotten = 1';
   connection.query(query, (err, results) => {
     if (err) {
@@ -145,7 +191,7 @@ app.get('/ischange/password',  (req, res) => {
 });
 
 // 路由 2: 修改对应的 username 的 is_forgotten 为 0，password 修改为 000000
-app.post('/ischange/password',  (req, res) => {
+app.post('/ischange/password',verifyToken,  (req, res) => {
   const { username } = req.body;
   if (!username) {
     return res.status(400).json({ error: '缺少必要的参数: username' });
@@ -162,35 +208,8 @@ app.post('/ischange/password',  (req, res) => {
     res.json({ message: `用户 ${username} 密码重置成功` });
   });
 });
- 
 
-// 使用JWT中间件进行身份验证
-const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
-  if (!token) {
-    return res.status(401).json({ message: 'No token provided.' });
-  }
-
-  jwt.verify(token, secret, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Token is invalid or expired.' });
-    }
-
-    // 确保JWT中包含userId字段
-    if (!decoded.userId) {
-      return res.status(401).json({ message: 'User ID not found in token.' });
-    }
-
-    // 将用户ID设置在请求对象上
-    req.userId = decoded.userId;
-    // console.log("req.userId:", req.userId);
-    next();
-  });
-};
-
-
-
-////
+// 处理注册请求的路由
 
 // 提供 HTML 页面
 app.get('/login', (req, res) => {
@@ -215,7 +234,6 @@ app.get('/activities', verifyToken, (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
   
-  // 构建SQL查询
   const query = `
     SELECT a.*, c.name as club_name, u.username as organizer  
     FROM activities a
@@ -225,25 +243,24 @@ app.get('/activities', verifyToken, (req, res) => {
     LIMIT ?, ?
   `;
   
-  // 计算总记录数的查询
   const countQuery = `SELECT COUNT(*) as total FROM activities`;
   
-  // 执行查询
   connection.query(query, [offset, limit], (error, results) => {
     if (error) {
+      console.error('Activities query error:', error);
       return res.status(500).json({ success: false, message: error.message });
     }
     
-    // 获取总记录数
     connection.query(countQuery, (err, countResults) => {
       if (err) {
+        console.error('Count query error:', err);
         return res.status(500).json({ success: false, message: err.message });
       }
       
-      // 计算总页数
       const totalPages = Math.ceil(countResults[0].total / limit);
       
-      // 返回结果
+      console.log('Returning activities data:', results); // 添加日志确认返回的数据
+      
       res.json({
         success: true,
         data: results,
@@ -289,47 +306,109 @@ app.post('/activities', verifyToken, (req, res) => {
 });
 
 // 参加活动
-app.post('/activities/:id/join', verifyToken, (req, res) => {
-  const activityId = req.params.id;
-  const userId = req.userId;
-  
-  // 检查用户是否已经参加了该活动
-  const checkQuery = `
-    SELECT * FROM activity_participants 
-    WHERE activity_id = ? AND user_id = ?
-  `;
-  
-  connection.query(checkQuery, [activityId, userId], (error, results) => {
-    if (error) {
-      return res.status(500).json({ success: false, message: error.message });
+app.post('/activities/:activityId/signup', verifyToken, (req, res) => {
+  const activityId = req.params.activityId;
+  const userId = req.userId; // 从 JWT 中获取用户 ID
+
+  // 检查用户是否已经报名该活动
+  const checkQuery = 'SELECT * FROM signups WHERE activity_id = ? AND user_id = ?';
+  connection.query(checkQuery, [activityId, userId], (checkError, checkResults) => {
+    if (checkError) {
+      console.error('检查用户报名状态时出错:', checkError);
+      return res.status(500).json({ success: false, message: '检查报名状态时出错' });
     }
-    
-    if (results.length > 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: '您已经参加了这个活动' 
-      });
+
+    if (checkResults.length > 0) {
+      return res.status(400).json({ success: false, message: '您已经报名了这个活动' });
     }
-    
-    // 插入参与记录
-    const insertQuery = `
-      INSERT INTO activity_participants (activity_id, user_id)
-      VALUES (?, ?)
-    `;
-    
-    connection.query(insertQuery, [activityId, userId], (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: err.message });
+
+    // 插入报名记录
+    const insertQuery = 'INSERT INTO signups (activity_id, user_id) VALUES (?, ?)';
+    connection.query(insertQuery, [activityId, userId], (insertError, insertResults) => {
+      if (insertError) {
+        console.error('报名活动时出错:', insertError);
+        return res.status(500).json({ success: false, message: '报名活动时出错' });
       }
-      
-      res.json({
-        success: true,
-        message: '成功参加活动',
-        data: { id: result.insertId }
-      });
+
+      res.json({ success: true, message: '报名成功' });
     });
   });
 });
+
+// 退出活动
+app.post('/activities/:activityId/withdraw', verifyToken, (req, res) => {
+  const activityId = req.params.activityId;
+  const userId = req.userId; // 从 JWT 中获取用户 ID
+
+  // 检查用户是否已经报名该活动
+  const checkQuery = 'SELECT * FROM signups WHERE activity_id = ? AND user_id = ?';
+  connection.query(checkQuery, [activityId, userId], (checkError, checkResults) => {
+    if (checkError) {
+      console.error('检查用户报名状态时出错:', checkError);
+      return res.status(500).json({ success: false, message: '检查报名状态时出错' });
+    }
+
+    if (checkResults.length === 0) {
+      return res.status(400).json({ success: false, message: '您没有报名这个活动，无法退出' });
+    }
+
+    // 删除报名记录
+    const deleteQuery = 'DELETE FROM signups WHERE activity_id = ? AND user_id = ?';
+    connection.query(deleteQuery, [activityId, userId], (deleteError, deleteResults) => {
+      if (deleteError) {
+        console.error('退出活动时出错:', deleteError);
+        return res.status(500).json({ success: false, message: '退出活动时出错' });
+      }
+
+      res.json({ success: true, message: '退出活动成功' });
+    });
+  });
+});
+
+
+
+// // 参加活动
+// app.post('/activities/:id/join', verifyToken, (req, res) => {
+//   const activityId = req.params.id;
+//   const userId = req.userId;
+  
+//   // 检查用户是否已经参加了该活动
+//   const checkQuery = `
+//     SELECT * FROM activity_participants 
+//     WHERE activity_id = ? AND user_id = ?
+//   `;
+  
+//   connection.query(checkQuery, [activityId, userId], (error, results) => {
+//     if (error) {
+//       return res.status(500).json({ success: false, message: error.message });
+//     }
+    
+//     if (results.length > 0) {
+//       return res.status(400).json({ 
+//         success: false, 
+//         message: '您已经参加了这个活动' 
+//       });
+//     }
+    
+//     // 插入参与记录
+//     const insertQuery = `
+//       INSERT INTO activity_participants (activity_id, user_id)
+//       VALUES (?, ?)
+//     `;
+    
+//     connection.query(insertQuery, [activityId, userId], (err, result) => {
+//       if (err) {
+//         return res.status(500).json({ success: false, message: err.message });
+//       }
+      
+//       res.json({
+//         success: true,
+//         message: '成功参加活动',
+//         data: { id: result.insertId }
+//       });
+//     });
+//   });
+// });
 
 // 积分管理API
 // 分配积分
