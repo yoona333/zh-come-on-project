@@ -131,21 +131,31 @@
 - MySQL (v5.7+)
 
 ### 8.2 安装依赖
+请在项目根目录（come-on-project/）下执行以下命令：
+
 ```bash
 # 安装所有依赖（前后端）
 npm run install-all
 ```
 
-### 8.3 启动开发服务
+### 8.3 启动服务
+所有命令都需要在项目根目录（come-on-project/）下执行：
+
 ```bash
-# 启动前端开发服务
+# 启动完整应用（生产环境）
+npm start
+
+# 启动完整应用（开发环境）
+npm run dev
+
+# 单独启动前端开发服务
 npm run frontend
 
-# 启动后端开发服务
+# 单独启动后端开发服务
 npm run backend
 
-# 启动完整应用
-npm run dev
+# 运行数据库迁移
+npm run migrate
 ```
 
 ---
