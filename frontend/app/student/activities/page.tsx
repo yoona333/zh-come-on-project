@@ -23,6 +23,7 @@ interface Activity {
   participant_count: number;
   status: number;
   is_signed_up?: boolean;
+  registration_time: string; // 假设添加报名时间字段
 }
 
 export default function StudentActivities() {
@@ -170,7 +171,12 @@ export default function StudentActivities() {
     
     const matchesStatus = statusFilter === null || activity.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    // 添加报名时间判断
+    const registrationDate = new Date(activity.registration_time);
+    const currentDate = new Date();
+    const matchesRegistrationTime = registrationDate <= currentDate;
+    
+    return matchesSearch && matchesStatus && matchesRegistrationTime;
   });
 
   const columns = [

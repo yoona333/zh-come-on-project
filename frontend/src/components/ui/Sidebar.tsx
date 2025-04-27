@@ -13,7 +13,8 @@ import {
   SettingOutlined,
   KeyOutlined,
   AuditOutlined,
-  GiftOutlined
+  GiftOutlined,
+  LineChartOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

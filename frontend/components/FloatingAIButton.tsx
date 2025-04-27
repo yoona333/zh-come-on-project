@@ -43,6 +43,13 @@ const defaultKnowledge: KnowledgeBaseType = {
     '程序设计大赛': '计算机学院每学期举办的编程比赛，题目涵盖算法、数据结构和实际应用开发。参与可获得5积分，获奖最高可得20积分。',
     '社团文化节': '每年秋季举办的社团展示活动，为期一周。各社团设置展台并组织特色活动。参与组织工作可获得5-10积分。',
     '学术论坛': '各学院定期举办的学术讲座和论坛，邀请知名学者和专业人士分享最新研究成果和行业动态。参与并提交心得可获得2积分。'
+  },
+  '积分上链': {
+    '基本介绍': '积分上链是将学生积分数据永久记录在区块链上的功能，确保数据安全、透明且不可篡改。',
+    '技术细节': '使用以太坊Sepolia测试网络，通过智能合约实现积分数据的存储和管理，需要MetaMask钱包连接。',
+    '操作权限': '仅合约所有者有权限进行添加和修改操作，普通用户可以查看但不能修改数据。',
+    '数据追溯': '所有积分变更都有完整的链上记录，可通过区块链浏览器查询每一笔交易的详细信息。',
+    '使用流程': '连接钱包 → 查看待上链数据 → 选择记录上链 → 确认交易 → 查看区块链记录。'
   }
 };
 
@@ -444,7 +451,16 @@ ${formatKnowledgeBase()}
           role: "system",
           content: "你是一个专业的积分活动规划专家，请基于以下知识回答用户的问题。" +
                   "如果问题可以用知识库中的内容回答，请直接使用知识库内容。" +
-                  "如果需要补充其他信息，请明确指出\"补充信息：\"。"
+                  "如果需要补充其他信息，请明确指出\"补充信息：\"。" +
+                  "\n\n积分上链知识：" +
+                  "\n积分上链是将学生积分数据永久记录在区块链上的功能，确保数据安全、透明且不可篡改。" +
+                  "\n- 使用以太坊Sepolia测试网络" +
+                  "\n- 需要连接MetaMask钱包才能操作" +
+                  "\n- 支持添加新学生数据到区块链" +
+                  "\n- 支持更新已上链的学生积分" +
+                  "\n- 支持查看区块链上的积分记录" +
+                  "\n- 仅合约所有者有权限进行添加和修改操作" +
+                  "\n- 所有积分变更都有完整的链上记录可追溯"
         }
       ];
       
@@ -459,7 +475,7 @@ ${formatKnowledgeBase()}
       setChatHistory(newChatHistory);
       
       // 构建完整消息列表
-      const messages = [...systemMessages, ...newChatHistory.slice(-10)]; // 只保留最近10条消息
+      const messages = [...systemMessages, ...newChatHistory.slice(-100)]; // 保留最近100条消息
       
       // 方法1：使用OpenAI客户端库
       if (typeof window !== 'undefined' && window.OpenAI) {
@@ -467,7 +483,7 @@ ${formatKnowledgeBase()}
         try {
           const client = new window.OpenAI({
             apiKey: apiKey,
-            baseURL: "https://api.moonshot.cn/v1", // Kimi和Moonshot使用相同的API接口
+            baseURL: "https://api.kimi.ai/v1", // 从moonshot改为kimi.ai
             dangerouslyAllowBrowser: true // 允许在浏览器环境使用
           });
           
@@ -494,7 +510,7 @@ ${formatKnowledgeBase()}
       
       // 方法2：使用fetch API
       console.log('使用fetch API调用Kimi API');
-      const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+      const response = await fetch('https://api.kimi.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -755,7 +771,8 @@ ${formatKnowledgeBase()}
       
       return response;
     }
-    else if (lowerCaseMessage.includes('比赛') || lowerCaseMessage.includes('大赛')) {
+    else if (lowerCaseMessage.includes('比赛') || lowerCaseMessage.includes('大赛') || 
+            lowerCaseMessage.includes('竞赛')) {
       let response = '我们有以下比赛活动：\n\n';
       
       if (lowerCaseMessage.includes('歌') || lowerCaseMessage.includes('唱') || lowerCaseMessage.includes('文艺')) {
@@ -809,6 +826,30 @@ ${formatKnowledgeBase()}
       
       return response;
     }
+    else if (lowerCaseMessage.includes('上链') || lowerCaseMessage.includes('区块链') || 
+            lowerCaseMessage.includes('blockchain')) {
+      // 处理积分上链相关问题
+      let response = '关于积分上链的信息：\n\n';
+      response += '积分上链是将学生积分数据永久记录在区块链上的功能，确保数据安全、透明且不可篡改。具体包括：\n\n';
+      response += '1. 使用以太坊Sepolia测试网络\n';
+      response += '2. 需要连接MetaMask钱包才能操作\n';
+      response += '3. 支持添加新学生数据到区块链\n';
+      response += '4. 支持更新已上链的学生积分\n';
+      response += '5. 支持查看区块链上的积分记录\n';
+      response += '6. 仅合约所有者有权限进行添加和修改操作\n';
+      response += '7. 所有积分变更都有完整的链上记录可追溯\n\n';
+      
+      if (lowerCaseMessage.includes('演示') || lowerCaseMessage.includes('怎么用')) {
+        response += '积分上链演示步骤：\n';
+        response += '1. 连接MetaMask钱包（点击"连接钱包"按钮）\n';
+        response += '2. 查看待上链积分数据（表格中的"上链状态"列）\n';
+        response += '3. 选择记录点击"上链"按钮\n';
+        response += '4. 确认信息并提交到区块链\n';
+        response += '5. 交易确认后，可点击"查看"按钮查看区块链记录\n';
+      }
+      
+      return response;
+    }
     else {
       return '关于"' + userMessage + '"，我没有找到直接相关的信息。你可以询问关于：\n\n' +
         '1. 积分活动（志愿服务、学术讲座、社团活动、文艺比赛、体育比赛、科技创新）\n' +
@@ -819,13 +860,64 @@ ${formatKnowledgeBase()}
     }
   };
 
-  // 添加增强版本的本地回复生成函数，更智能地处理用户兴趣和活动推荐
+  // 增强版本的本地回答生成
   const generateEnhancedLocalResponse = (userMessage: string) => {
     const lowerCaseMessage = userMessage.toLowerCase();
     
+    // 分析查询意图和主题
+    const categories: string[] = [];
+    const specificItems: string[] = [];
+    
+    // 检测意图类别
+    if (lowerCaseMessage.includes('积分') || lowerCaseMessage.includes('活动') || 
+        lowerCaseMessage.includes('参与') || lowerCaseMessage.includes('获得')) {
+      categories.push('积分活动');
+    }
+    
+    if (lowerCaseMessage.includes('兑换') || lowerCaseMessage.includes('换取') || 
+        lowerCaseMessage.includes('使用积分') || lowerCaseMessage.includes('奖励')) {
+      categories.push('积分兑换');
+    }
+    
+    if (lowerCaseMessage.includes('规则') || lowerCaseMessage.includes('怎么算') || 
+        lowerCaseMessage.includes('如何计算') || lowerCaseMessage.includes('上限')) {
+      categories.push('积分规则');
+    }
+    
+    if (lowerCaseMessage.includes('最近') || lowerCaseMessage.includes('推荐') || 
+        lowerCaseMessage.includes('热门') || lowerCaseMessage.includes('什么活动')) {
+      categories.push('热门活动');
+    }
+    
+    if (lowerCaseMessage.includes('上链') || lowerCaseMessage.includes('区块链') || 
+        lowerCaseMessage.includes('blockchain') || lowerCaseMessage.includes('链上')) {
+      categories.push('积分上链');
+      
+      if (lowerCaseMessage.includes('怎么') || lowerCaseMessage.includes('如何') || 
+          lowerCaseMessage.includes('流程') || lowerCaseMessage.includes('步骤') ||
+          lowerCaseMessage.includes('演示')) {
+        specificItems.push('使用流程');
+      }
+      
+      if (lowerCaseMessage.includes('权限') || lowerCaseMessage.includes('谁能') || 
+          lowerCaseMessage.includes('能不能') || lowerCaseMessage.includes('所有者')) {
+        specificItems.push('操作权限');
+      }
+      
+      if (lowerCaseMessage.includes('技术') || lowerCaseMessage.includes('实现') || 
+          lowerCaseMessage.includes('metamask') || lowerCaseMessage.includes('钱包')) {
+        specificItems.push('技术细节');
+      }
+      
+      if (lowerCaseMessage.includes('记录') || lowerCaseMessage.includes('追溯') || 
+          lowerCaseMessage.includes('查询') || lowerCaseMessage.includes('历史')) {
+        specificItems.push('数据追溯');
+      }
+    }
+    
     // 检查是否是问候语
     if (lowerCaseMessage.match(/^(你好|您好|早上好|下午好|晚上好|嗨|hi|hello).*/i)) {
-      return '你好！我是你的积分活动助手，很高兴为你服务。你可以向我咨询关于校园活动、积分规则、积分兑换等问题，或者告诉我你的兴趣，我可以为你推荐相关活动。';
+      return '你好！我是你的积分活动助手，很高兴为你服务。你可以向我咨询关于校园活动、积分规则、积分兑换、积分上链等问题，或者告诉我你的兴趣，我可以为你推荐相关活动。';
     }
     
     // 兴趣相关关键词
@@ -837,6 +929,45 @@ ${formatKnowledgeBase()}
       '学术': ['学术', '讲座', '论坛', '研讨', '科研', '学习', '研究', '知识', '学问', '专业', '报告'],
       '社团': ['社团', '组织', '团体', '学生会', '俱乐部', '协会', '社交']
     };
+    
+    // 如果专门询问了积分上链相关内容
+    if (categories.includes('积分上链') && 
+        (lowerCaseMessage.includes('什么是') || lowerCaseMessage.includes('是什么') || 
+        lowerCaseMessage.includes('介绍') || lowerCaseMessage.includes('说明'))) {
+      let response = '关于积分上链的信息：\n\n';
+      
+      // 基本介绍
+      if ('基本介绍' in knowledgeBase['积分上链']) {
+        response += knowledgeBase['积分上链']['基本介绍'] + '\n\n';
+      }
+      
+      // 添加特定请求的信息
+      for (const item of specificItems) {
+        if (item in knowledgeBase['积分上链']) {
+          response += `【${item}】: ${knowledgeBase['积分上链'][item]}\n\n`;
+        }
+      }
+      
+      // 如果没有特定请求项，添加所有信息
+      if (specificItems.length === 0) {
+        for (const [key, value] of Object.entries(knowledgeBase['积分上链'])) {
+          if (key !== '基本介绍') {
+            response += `【${key}】: ${value}\n\n`;
+          }
+        }
+      }
+      
+      if (lowerCaseMessage.includes('演示') || lowerCaseMessage.includes('怎么用')) {
+        response += '积分上链演示步骤：\n';
+        response += '1. 连接MetaMask钱包（点击"连接钱包"按钮）\n';
+        response += '2. 查看待上链积分数据（表格中的"上链状态"列）\n';
+        response += '3. 选择记录点击"上链"按钮\n';
+        response += '4. 确认信息并提交到区块链\n';
+        response += '5. 交易确认后，可点击"查看"按钮查看区块链记录\n';
+      }
+      
+      return response;
+    }
     
     // 分析用户兴趣
     let detectedInterests: string[] = [];

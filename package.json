@@ -9,7 +9,8 @@
     "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend && npm run dev",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "vercel-build": "cd frontend && npm install && npm run build"
   },
   "author": "",
   "license": "ISC"

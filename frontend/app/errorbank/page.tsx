@@ -3,7 +3,7 @@
 // ErrorBankPage（总错题库页面）
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
-import Home from '../homedaohan/page'; // 引入Sidebar组件
+import Sidebar from '../components/ui/Sidebar'; // 引入Sidebar组件
 import ErrorDetailModal from '../css/ErrorDetailModal'; // 引入模态框组件
 import styles from './ErrorBankPage.module.css'; // 修改这一行
 import withAuthentication from '../api/jwt';
@@ -109,7 +109,7 @@ const ErrorBankPage: React.FC = () => {
   // render方法中的完整return代码
   return (
     <div className={styles.container}>
-      <Home />
+      <Sidebar role="student" collapsed={false} />
       <div className={styles.content}>
         <h1>Error Bank Data</h1>
         <form

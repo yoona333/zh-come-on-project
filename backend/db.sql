@@ -74,6 +74,29 @@ CREATE TABLE IF NOT EXISTS points (
     FOREIGN KEY (activity_id) REFERENCES activities(id)
 );
 
+-- 积分兑换记录表
+CREATE TABLE IF NOT EXISTS points_exchange_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT,
+    points INT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 产品/奖品表
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    points_required INT NOT NULL,
+    image VARCHAR(255),
+    remaining_quantity INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- 1. 添加用户数据
 INSERT INTO users (username, password, role) VALUES
 ('admin', 'admin123', 0),  -- 管理员

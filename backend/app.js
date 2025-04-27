@@ -966,6 +966,132 @@ app.get('/api/stats', verifyToken, (req, res) => {
     });
   });
 });
+
+// 获取统计数据趋势
+app.get('/api/stats/trend', verifyToken, (req, res) => {
+  // 获取过去7天的数据趋势
+  const trendQuery = `
+    SELECT 
+      DATE(created_at) as date,
+      COUNT(*) as count
+    FROM activities
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY date
+  `;
+
+  const usersQuery = `
+    SELECT 
+      DATE(created_at) as date,
+      COUNT(*) as count
+    FROM users
+    WHERE role != 0 AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY date
+  `;
+
+  const clubsQuery = `
+    SELECT 
+      DATE(created_at) as date,
+      COUNT(*) as count
+    FROM clubs
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY date
+  `;
+
+  // 初始化日期数组，包含过去7天
+  const dates = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    dates.push(date.toISOString().split('T')[0]);
+  }
+
+  // 查询活动趋势
+  db.query(trendQuery, (err, activitiesResult) => {
+    if (err) {
+      console.error('获取活动趋势失败:', err);
+      return res.status(500).json({ success: false, message: '获取趋势数据失败' });
+    }
+
+    // 查询用户趋势
+    db.query(usersQuery, (err, usersResult) => {
+      if (err) {
+        console.error('获取用户趋势失败:', err);
+        return res.status(500).json({ success: false, message: '获取趋势数据失败' });
+      }
+
+      // 查询社团趋势
+      db.query(clubsQuery, (err, clubsResult) => {
+        if (err) {
+          console.error('获取社团趋势失败:', err);
+          return res.status(500).json({ success: false, message: '获取趋势数据失败' });
+        }
+
+        // 将SQL结果转换为映射对象，以便于查找
+        const activitiesByDate = {};
+        const usersByDate = {};
+        const clubsByDate = {};
+
+        activitiesResult.forEach(row => {
+          activitiesByDate[row.date] = row.count;
+        });
+
+        usersResult.forEach(row => {
+          usersByDate[row.date] = row.count;
+        });
+
+        clubsResult.forEach(row => {
+          clubsByDate[row.date] = row.count;
+        });
+
+        // 构建最终返回的数据
+        const trendData = dates.map(date => {
+          return {
+            date,
+            activities: activitiesByDate[date] || 0,
+            students: usersByDate[date] || 0,
+            clubs: clubsByDate[date] || 0
+          };
+        });
+
+        res.status(200).json({
+          success: true,
+          data: trendData
+        });
+      });
+    });
+  });
+});
+
+// 获取社团活动统计数据
+app.get('/api/clubs/activity-stats', verifyToken, (req, res) => {
+  const query = `
+    SELECT 
+      c.name,
+      COUNT(a.id) as value
+    FROM clubs c
+    LEFT JOIN activities a ON c.id = a.club_id
+    GROUP BY c.id, c.name
+    ORDER BY value DESC
+    LIMIT 10
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('获取社团活动统计失败:', err);
+      return res.status(500).json({ success: false, message: '获取社团活动统计失败' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: results
+    });
+  });
+});
+
 // 获取待审批活动
 app.get('/api/activities/pending', verifyToken, (req, res) => {
   const query = `
@@ -3237,110 +3363,35 @@ app.post('/api/reservations/:activityId/signup', verifyToken, async (req, res) =
 
 // ... existing code ...
 
+// 修改获取所有预约记录的 API
+// 修改获取所有预约记录的 API
 app.get('/api/reservations/all', verifyToken, (req, res) => {
+
   // 创建当前时间对象
   let currentTime = new Date();
   // 给当前时间加上24小时（1小时 = 60分钟，1分钟 = 60秒，1秒 = 1000毫秒）
-  currentTime.setTime(currentTime.getTime() + 24 * 60 * 60 * 1000);
-  // 格式化时间
+  currentTime.setTime(currentTime.getTime() + 32 * 60 * 60 * 1000);
   const formattedTime = currentTime.toISOString().slice(0, 19).replace('T', ' ');
+ const query = `
+ SELECT r.id, r.user_id, r.activity_id, r.is_reserved, r.created_at, r.updated_at,r.is_read,
+a.title, a.description, a.start_time, a.end_time, a.location, a.max_participants, a.status
+FROM reservations r
+ JOIN activities a ON r.activity_id = a.id
+ WHERE r.user_id = ? AND a.registration_time <= ?
+`;
 
-  const reservationsQuery = `
-    SELECT r.*, a.*
-    FROM reservations r
-    JOIN activities a ON r.activity_id = a.id
-    WHERE r.user_id = ? 
-      AND r.is_reserved = 1
-      AND a.registration_time < ?
-      AND r.is_read = 0
-  `;
+ db.query(query, [req.userId,formattedTime], (err, results) => {
+ if (err) {
+ console.error('获取预约列表失败:', err);
+ return res.status(500).json({ success: false, message: '获取预约列表失败' });
+ }
 
-  // 先查询 clubs 表中的 leader_id 对应的 id 字段
-  const getClubIdsQuery = `
-    SELECT IFNULL(id, 0) as club_id
-    FROM clubs
-    WHERE leader_id = ?
-  `;
-
-// ... existing code ...
-
-// 执行 reservations 表的查询
-db.query(reservationsQuery, [req.userId, formattedTime], (err, reservationsResults) => {
-  if (err) {
-    console.error('获取 reservations 表未读记录失败:', err);
-    return res.status(500).json({ success: false, message: '获取未读预约记录失败' });
-  }
-
-  // 执行查询 clubs 表的操作
-  db.query(getClubIdsQuery, [req.userId], (err, clubResults) => {
-    if (err) {
-      console.error('查询 clubs 表失败:', err);
-      return res.status(500).json({ success: false, message: '获取未读拒绝记录失败' });
-    }
-
-    const clubIds = clubResults.map(result => result.club_id);
-    let rejectionQuery;
-    if (clubIds.length === 0 || (clubIds.length === 1 && clubIds[0] === 0)) {
-      // 如果没有匹配的 club_id，直接返回空数组
-      rejectionQuery = `
-        SELECT * FROM rejection WHERE 1=0
-      `;
-    } else {
-      const placeholders = clubIds.map(() => '?').join(',');
-      rejectionQuery = `
-        SELECT *
-        FROM rejection
-        WHERE activitie_id IN (${placeholders})
-          AND is_read = 0
-      `;
-    }
-
-    // 执行 rejection 表的查询
-    db.query(rejectionQuery, clubIds, (err, rejectionResults) => {
-      if (err) {
-        console.error('获取 rejection 表未读记录失败:', err);
-        return res.status(500).json({ success: false, message: '获取未读拒绝记录失败' });
-      }
-
-      // 给预约记录添加 reservation_id 并移除原 id
-      const processedReservations = reservationsResults.map(item => {
-        const { id, ...rest } = item;
-        return {
-          ...rest,
-          reservation_id: id,
-          is_rejection: false
-        };
-      });
-
-      // 给拒绝记录添加 rejection_id 并移除原 id
-      const processedRejections = rejectionResults.map(item => {
-        const { id, ...rest } = item;
-        return {
-          ...rest,
-          rejection_id: id,
-          is_rejection: true
-        };
-      });
-
-      // 合并处理后的结果
-      const combinedResults = [...processedReservations, ...processedRejections];
-
-      // 添加打印语句
-      console.log(`用户 ${req.userId} 的未读预约记录数量为: ${reservationsResults.length}`);
-      console.log(`用户 ${req.userId} 的未读拒绝记录数量为: ${rejectionResults.length}`);
-      console.log(`用户 ${req.userId} 的总未读记录数量为: ${combinedResults.length}`);
-
-      res.status(200).json({
-        success: true,
-        data: combinedResults
-      });
-    });
-  });
+ res.status(200).json({
+ success: true,
+ data: results
+ });
 });
-
-// ... existing code ...
 });
-
 // ... existing code ...
 
 // 添加更新 is_read 字段的 API
@@ -3454,7 +3505,6 @@ app.get('/api/reservations/unread-count', verifyToken, (req, res) => {
     });
   });
 });
-
 // ... existing code ...
 
 // 获取所有奖品信息
@@ -3705,3 +3755,200 @@ app.get('/api/user/points-history', verifyToken, (req, res) => {
 app.listen(8080, () => {
   console.log('后端服务器运行在 http://localhost:8080');
 });
+
+// 获取用户积分信息
+app.get('/api/user/points', verifyToken, (req, res) => {
+  const userId = req.userId;
+  
+  // 获取用户总积分
+  const totalPointsQuery = `
+    SELECT IFNULL(SUM(points), 0) as total
+    FROM points
+    WHERE user_id = ?
+  `;
+  
+  // 获取用户已使用积分
+  const usedPointsQuery = `
+    SELECT IFNULL(SUM(points), 0) as used
+    FROM points_exchange_records
+    WHERE user_id = ?
+  `;
+  
+  db.query(totalPointsQuery, [userId], (err, totalResult) => {
+    if (err) {
+      console.error('获取用户总积分失败:', err);
+      return res.status(500).json({ success: false, message: '获取积分数据失败' });
+    }
+    
+    db.query(usedPointsQuery, [userId], (err, usedResult) => {
+      if (err) {
+        console.error('获取用户已使用积分失败:', err);
+        return res.status(500).json({ success: false, message: '获取积分数据失败' });
+      }
+      
+      const total = totalResult[0].total || 0;
+      const used = usedResult[0].used || 0;
+      const remaining = total - used;
+      
+      res.status(200).json({
+        success: true,
+        total: total,
+        used: used,
+        remaining: remaining
+      });
+    });
+  });
+});
+
+// 获取用户积分历史数据
+app.get('/api/user/points/history', verifyToken, (req, res) => {
+  const userId = req.userId;
+  
+  // 获取用户积分获取记录
+  const earnQuery = `
+    SELECT p.id, p.points, p.reason, a.title as activity_name, p.created_at
+    FROM points p
+    LEFT JOIN activities a ON p.activity_id = a.id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC
+  `;
+  
+  // 获取用户积分使用记录
+  const spendQuery = `
+    SELECT id, points, product_id, description, created_at
+    FROM points_exchange_records
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+  `;
+  
+  db.query(earnQuery, [userId], (err, earnRecords) => {
+    if (err) {
+      console.error('获取积分获取记录失败:', err);
+      return res.status(500).json({ success: false, message: '获取积分历史失败' });
+    }
+    
+    db.query(spendQuery, [userId], (err, spendRecords) => {
+      if (err) {
+        console.error('获取积分使用记录失败:', err);
+        return res.status(500).json({ success: false, message: '获取积分历史失败' });
+      }
+      
+      res.status(200).json({
+        success: true,
+        earn: earnRecords,
+        spend: spendRecords
+      });
+    });
+  });
+});
+
+// 获取用户活动参与统计
+app.get('/api/user/activity-stats', verifyToken, (req, res) => {
+  const userId = req.userId;
+  
+  // 获取用户参与的活动类型分布
+  const activityTypesQuery = `
+    SELECT a.category, COUNT(*) as count
+    FROM activity_participants ap
+    JOIN activities a ON ap.activity_id = a.id
+    WHERE ap.user_id = ?
+    GROUP BY a.category
+  `;
+  
+  // 获取用户参与的活动状态分布
+  const activityStatusQuery = `
+    SELECT a.status, COUNT(*) as count
+    FROM activity_participants ap
+    JOIN activities a ON ap.activity_id = a.id
+    WHERE ap.user_id = ?
+    GROUP BY a.status
+  `;
+  
+  // 获取用户过去6个月的活动参与趋势
+  const activityTrendQuery = `
+    SELECT 
+      DATE_FORMAT(a.start_time, '%Y-%m') as month,
+      COUNT(*) as count
+    FROM activity_participants ap
+    JOIN activities a ON ap.activity_id = a.id
+    WHERE ap.user_id = ? AND a.start_time >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+    GROUP BY DATE_FORMAT(a.start_time, '%Y-%m')
+    ORDER BY month
+  `;
+  
+  db.query(activityTypesQuery, [userId], (err, typesResult) => {
+    if (err) {
+      console.error('获取活动类型分布失败:', err);
+      return res.status(500).json({ success: false, message: '获取活动统计失败' });
+    }
+    
+    db.query(activityStatusQuery, [userId], (err, statusResult) => {
+      if (err) {
+        console.error('获取活动状态分布失败:', err);
+        return res.status(500).json({ success: false, message: '获取活动统计失败' });
+      }
+      
+      db.query(activityTrendQuery, [userId], (err, trendResult) => {
+        if (err) {
+          console.error('获取活动参与趋势失败:', err);
+          return res.status(500).json({ success: false, message: '获取活动统计失败' });
+        }
+        
+        // 处理月份数据，确保包含过去6个月
+        const months = [];
+        const today = new Date();
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(today);
+          d.setMonth(d.getMonth() - i);
+          const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          months.push(monthStr);
+        }
+        
+        // 构建趋势数据
+        const trendData = months.map(month => {
+          const found = trendResult.find(r => r.month === month);
+          return {
+            month,
+            count: found ? found.count : 0
+          };
+        });
+        
+        res.status(200).json({
+          success: true,
+          data: {
+            types: typesResult,
+            status: statusResult,
+            trend: trendData
+          }
+        });
+      });
+    });
+  });
+});
+
+// 获取用户社团活动统计
+app.get('/api/user/clubs', verifyToken, (req, res) => {
+  const userId = req.userId;
+  
+  // 获取用户加入的社团列表
+  const query = `
+    SELECT c.id, c.name, c.description, c.logo, cm.role as member_role, cm.join_date
+    FROM club_members cm
+    JOIN clubs c ON cm.club_id = c.id
+    WHERE cm.user_id = ?
+  `;
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('获取用户社团列表失败:', err);
+      return res.status(500).json({ success: false, message: '获取社团数据失败' });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: results
+    });
+  });
+});
+
+// 获取社团活动统计数据

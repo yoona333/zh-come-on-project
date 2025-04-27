@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, List, Tag, Button, Typography, Spin, message } from 'antd';
-import { CalendarOutlined, EnvironmentOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Statistic, List, Tag, Button, Typography, Spin, message, Tabs, Divider } from 'antd';
+import { CalendarOutlined, EnvironmentOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, InfoCircleOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import styles from '../../src/styles/Student.module.scss';
+import ReactECharts from 'echarts-for-react';
 
 const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 interface Activity {
   id: number;
@@ -26,6 +28,38 @@ interface UserInfo {
   avatar?: string;
 }
 
+interface PointHistoryItem {
+  id: number;
+  points: number;
+  activity_name?: string;
+  reason?: string;
+  description?: string; 
+  created_at: string;
+}
+
+interface ActivityStatsData {
+  types: Array<{category: string, count: number}>;
+  status: Array<{status: number, count: number}>;
+  trend: Array<{month: string, count: number}>;
+}
+
+const statusMap: Record<number, string> = {
+  0: '待审核',
+  1: '已通过',
+  2: '已拒绝',
+  3: '已完成',
+  4: '已取消'
+};
+
+const categoryMap: Record<string, string> = {
+  'sports': '体育活动',
+  'academic': '学术活动',
+  'art': '艺术活动',
+  'community': '社区服务',
+  'technology': '科技活动',
+  'other': '其他活动'
+};
+
 export default function StudentDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -35,6 +69,18 @@ export default function StudentDashboard() {
     activitiesCount: 0,
     pointsCount: 0,
     clubsCount: 0
+  });
+  const [pointsHistory, setPointsHistory] = useState<{
+    earn: PointHistoryItem[];
+    spend: PointHistoryItem[];
+  }>({
+    earn: [],
+    spend: []
+  });
+  const [activityStats, setActivityStats] = useState<ActivityStatsData>({
+    types: [],
+    status: [],
+    trend: []
   });
 
   useEffect(() => {
@@ -59,6 +105,7 @@ export default function StudentDashboard() {
         }
         
         const userData = authResponse.data.data;
+        setUserInfo(userData);
         const actualRole = userData.role.toString();
         
         // 检查是否有权限访问学生页面 (角色为学生或社长)
@@ -77,7 +124,8 @@ export default function StudentDashboard() {
         // 加载数据
         await Promise.all([
           fetchStats(token),
-          fetchUpcomingActivities(token)
+          fetchUpcomingActivities(token),
+          fetchAnalyticsData(token)
         ]);
         
         setLoading(false);
@@ -115,13 +163,51 @@ export default function StudentDashboard() {
       });
     } catch (error) {
       console.error('获取统计数据失败:', error);
-      // 使用默认值或从localStorage获取
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      message.error('获取统计数据失败，请检查网络连接');
+      
+      // 使用模拟数据
       setStats({
-        activitiesCount: 12, // 示例数据
-        pointsCount: userInfo.points || 156, // 示例数据
-        clubsCount: 3 // 示例数据
+        activitiesCount: Math.floor(Math.random() * 10) + 5,
+        pointsCount: Math.floor(Math.random() * 500) + 200,
+        clubsCount: Math.floor(Math.random() * 5) + 1
       });
+    }
+  };
+
+  const fetchAnalyticsData = async (token: string) => {
+    try {
+      // 获取积分历史
+      const historyResponse = await axios.get('http://localhost:8080/api/user/points/history', {
+        headers: { 'x-access-token': token }
+      });
+      
+      if (historyResponse.data.success) {
+        setPointsHistory(historyResponse.data);
+      } else {
+        console.error('获取积分历史数据失败:', historyResponse.data.message);
+        message.error('获取积分历史数据失败');
+        setPointsHistory(generateMockPointsHistory());
+      }
+      
+      // 获取活动统计数据
+      const activityStatsResponse = await axios.get('http://localhost:8080/api/user/activity-stats', {
+        headers: { 'x-access-token': token }
+      });
+      
+      if (activityStatsResponse.data.success) {
+        setActivityStats(activityStatsResponse.data.data);
+      } else {
+        console.error('获取活动统计数据失败:', activityStatsResponse.data.message);
+        message.error('获取活动统计数据失败');
+        setActivityStats(generateMockActivityStats());
+      }
+    } catch (error) {
+      console.error('获取数据分析失败:', error);
+      message.error('获取数据分析失败，请检查网络连接');
+      
+      // 使用模拟数据
+      setPointsHistory(generateMockPointsHistory());
+      setActivityStats(generateMockActivityStats());
     }
   };
 
@@ -140,36 +226,17 @@ export default function StudentDashboard() {
         ).slice(0, 3); // 只取前3个活动
         
         setActivities(upcomingActivities);
+      } else {
+        console.error('获取即将开始的活动失败:', response.data.message);
+        message.error('获取活动数据失败');
+        setActivities(generateMockActivities());
       }
     } catch (error) {
       console.error('获取即将开始的活动失败:', error);
-      // 设置一些示例数据
-      setActivities([
-        {
-          id: 1,
-          title: '校园歌唱比赛',
-          location: '大礼堂',
-          start_time: '2023-06-15 19:00:00',
-          tags: '文艺,比赛',
-          points: 10
-        },
-        {
-          id: 2,
-          title: '志愿者服务日',
-          location: '校门口',
-          start_time: '2023-06-18 09:00:00',
-          tags: '志愿者,服务',
-          points: 15
-        },
-        {
-          id: 3,
-          title: '程序设计大赛',
-          location: '计算机楼',
-          start_time: '2023-06-20 14:00:00',
-          tags: '科技,比赛',
-          points: 20
-        }
-      ]);
+      message.error('获取活动数据失败，请检查网络连接');
+      
+      // 使用模拟数据
+      setActivities(generateMockActivities());
     }
   };
 
@@ -193,6 +260,253 @@ export default function StudentDashboard() {
       console.error('报名失败:', error);
       message.error(error.response?.data?.message || '报名失败，请稍后再试');
     }
+  };
+
+  // 获取活动类型分布图配置
+  const getActivityTypesOption = () => {
+    const data = activityStats.types.map(item => ({
+      name: categoryMap[item.category] || item.category,
+      value: item.count
+    }));
+    
+    return {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        data: data.map(item => item.name)
+      },
+      series: [
+        {
+          name: '活动类型',
+          type: 'pie',
+          radius: ['50%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '20',
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: data
+        }
+      ]
+    };
+  };
+
+  // 获取活动趋势图配置
+  const getActivityTrendOption = () => {
+    return {
+      tooltip: {
+        trigger: 'axis',
+        formatter: '{b}: {c}'
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: activityStats.trend.map(item => item.month)
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '活动数量',
+          type: 'line',
+          stack: 'Total',
+          areaStyle: {},
+          emphasis: {
+            focus: 'series'
+          },
+          data: activityStats.trend.map(item => item.count)
+        }
+      ]
+    };
+  };
+  
+  // 获取积分收支图表配置
+  const getPointsChartOption = () => {
+    // 计算每个月的积分收入
+    const earnByMonth: Record<string, number> = {};
+    pointsHistory.earn.forEach(item => {
+      const date = new Date(item.created_at);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      earnByMonth[monthKey] = (earnByMonth[monthKey] || 0) + item.points;
+    });
+    
+    // 计算每个月的积分支出
+    const spendByMonth: Record<string, number> = {};
+    pointsHistory.spend.forEach(item => {
+      const date = new Date(item.created_at);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      spendByMonth[monthKey] = (spendByMonth[monthKey] || 0) + item.points;
+    });
+    
+    // 生成近6个月的月份列表
+    const months = [];
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() - i);
+      months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+    }
+    
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      legend: {
+        data: ['获得积分', '使用积分']
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: months
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '获得积分',
+          type: 'bar',
+          emphasis: {
+            focus: 'series'
+          },
+          data: months.map(month => earnByMonth[month] || 0)
+        },
+        {
+          name: '使用积分',
+          type: 'bar',
+          emphasis: {
+            focus: 'series'
+          },
+          data: months.map(month => -(spendByMonth[month] || 0))
+        }
+      ]
+    };
+  };
+
+  // 生成模拟活动数据
+  const generateMockActivities = (): Activity[] => {
+    const mockActivities: Activity[] = [];
+    const activityNames = ['校园文化节', '足球联赛', '演讲比赛', '志愿者服务日', '科技创新大赛'];
+    const locations = ['大礼堂', '运动场', '教学楼B101', '社区中心', '图书馆'];
+    const tags = ['文化,艺术', '体育,团队', '学术,能力', '志愿者,公益', '科技,创新'];
+    
+    for (let i = 0; i < 3; i++) {
+      const randomDate = new Date();
+      randomDate.setDate(randomDate.getDate() + Math.floor(Math.random() * 14) + 1);
+      
+      mockActivities.push({
+        id: i + 1,
+        title: activityNames[i],
+        location: locations[i],
+        start_time: randomDate.toISOString(),
+        tags: tags[i],
+        points: Math.floor(Math.random() * 50) + 10
+      });
+    }
+    
+    return mockActivities;
+  };
+  
+  // 生成模拟积分历史数据
+  const generateMockPointsHistory = () => {
+    const earn: PointHistoryItem[] = [];
+    const spend: PointHistoryItem[] = [];
+    const activityNames = ['校园文化节', '足球联赛', '演讲比赛', '志愿者服务日', '科技创新大赛'];
+    const spendReasons = ['兑换礼品', '课程抵扣', '活动报名', '会员升级'];
+    
+    for (let i = 0; i < 5; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i * 5);
+      
+      earn.push({
+        id: i + 1,
+        points: Math.floor(Math.random() * 50) + 10,
+        activity_name: activityNames[i % activityNames.length],
+        created_at: date.toISOString()
+      });
+      
+      if (i < 3) {
+        const spendDate = new Date();
+        spendDate.setDate(spendDate.getDate() - i * 7);
+        
+        spend.push({
+          id: 100 + i,
+          points: Math.floor(Math.random() * 30) + 5,
+          description: spendReasons[i % spendReasons.length],
+          created_at: spendDate.toISOString()
+        });
+      }
+    }
+    
+    return { earn, spend };
+  };
+  
+  // 生成模拟活动统计数据
+  const generateMockActivityStats = (): ActivityStatsData => {
+    // 生成活动类型分布
+    const types = [
+      { category: 'sports', count: Math.floor(Math.random() * 20) + 5 },
+      { category: 'academic', count: Math.floor(Math.random() * 15) + 5 },
+      { category: 'art', count: Math.floor(Math.random() * 10) + 3 },
+      { category: 'community', count: Math.floor(Math.random() * 10) + 2 },
+      { category: 'technology', count: Math.floor(Math.random() * 8) + 1 }
+    ];
+    
+    // 生成活动状态分布
+    const status = [
+      { status: 1, count: Math.floor(Math.random() * 15) + 10 },
+      { status: 3, count: Math.floor(Math.random() * 25) + 15 },
+      { status: 4, count: Math.floor(Math.random() * 5) + 1 }
+    ];
+    
+    // 生成活动参与趋势
+    const trend = [];
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today);
+      d.setMonth(d.getMonth() - i);
+      const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      trend.push({
+        month: monthStr,
+        count: Math.floor(Math.random() * 8) + 1
+      });
+    }
+    
+    return { types, status, trend };
   };
 
   if (loading) {
@@ -249,20 +563,16 @@ export default function StudentDashboard() {
       <List
         itemLayout="horizontal"
         dataSource={activities}
-        renderItem={(activity) => (
+        renderItem={activity => (
           <List.Item
             actions={[
-              <Button 
-                key="signup" 
-                type="primary" 
-                onClick={() => handleActivitySignup(activity.id)}
-              >
-                报名参加
+              <Button key="signup" type="primary" onClick={() => handleActivitySignup(activity.id)}>
+                立即报名
               </Button>
             ]}
           >
             <List.Item.Meta
-              title={<Link href={`/student/activities/${activity.id}`}>{activity.title}</Link>}
+              title={activity.title}
               description={
                 <div>
                   <p>
@@ -273,14 +583,11 @@ export default function StudentDashboard() {
                     <EnvironmentOutlined style={{ marginRight: 8 }} /> 
                     {activity.location}
                   </p>
-                  <p>
-                    <TrophyOutlined style={{ marginRight: 8 }} /> 
-                    积分: {activity.points}
-                  </p>
                   <div>
-                    {activity.tags.split(',').map((tag: string) => (
-                      <Tag key={tag} color="blue">{tag}</Tag>
+                    {activity.tags.split(',').map(tag => (
+                      <Tag key={tag} color="blue" style={{ marginBottom: 5 }}>{tag}</Tag>
                     ))}
+                    <Tag color="green">+{activity.points} 积分</Tag>
                   </div>
                 </div>
               }
@@ -289,18 +596,64 @@ export default function StudentDashboard() {
         )}
       />
       
-      <div className={styles.moreContent}>
-        <Link href="/student/activities">
-          <Button type="default" block>查看更多内容</Button>
-        </Link>
+      <Divider />
+      
+      <div className={styles.sectionHeader}>
+        <Title level={5}>
+          <LineChartOutlined style={{ marginRight: 8 }} />
+          数据分析看板
+        </Title>
       </div>
 
-      <div style={{ marginBottom: '20px', padding: '8px 12px', backgroundColor: '#f6f6f6', borderRadius: '4px' }}>
-        <p style={{ color: '#666', margin: 0 }}>
-          <InfoCircleOutlined style={{ marginRight: 8 }} />
-          学号、年级、班级、学院、专业等信息不可修改，如需更改请联系管理员
-        </p>
-      </div>
+      <Tabs defaultActiveKey="1">
+        <TabPane 
+          tab={<span><TrophyOutlined />积分趋势</span>} 
+          key="1"
+        >
+          <Card title="积分收支趋势" bordered={false}>
+            <ReactECharts option={getPointsChartOption()} style={{ height: '300px' }} />
+          </Card>
+        </TabPane>
+        
+        <TabPane 
+          tab={<span><PieChartOutlined />活动统计</span>} 
+          key="2"
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Card title="活动类型分布" bordered={false}>
+                <ReactECharts option={getActivityTypesOption()} style={{ height: '300px' }} />
+              </Card>
+            </Col>
+            <Col span={12}>
+              <Card title="活动参与趋势" bordered={false}>
+                <ReactECharts option={getActivityTrendOption()} style={{ height: '300px' }} />
+              </Card>
+            </Col>
+          </Row>
+        </TabPane>
+      </Tabs>
+      
+      <Divider />
+      
+      <Title level={5}>最近积分记录</Title>
+      <List
+        itemLayout="horizontal"
+        dataSource={[...pointsHistory.earn, ...pointsHistory.spend]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5)}
+        renderItem={item => (
+          <List.Item>
+            <List.Item.Meta
+              title={item.activity_name || item.description || '积分记录'}
+              description={new Date(item.created_at).toLocaleString()}
+            />
+            <div style={{ color: item.activity_name ? '#52c41a' : '#f5222d', fontWeight: 'bold' }}>
+              {item.activity_name ? `+${item.points}` : `-${item.points}`}
+            </div>
+          </List.Item>
+        )}
+      />
     </div>
   );
 }
