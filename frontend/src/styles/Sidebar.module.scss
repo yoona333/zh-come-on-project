@@ -1,0 +1,205 @@
+@import './theme.scss';
+
+.sidebar {
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: $header-height;
+  overflow: auto;
+  background-color: #fff;
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+  z-index: 999;
+  transition: width 0.3s $ease-in-out;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &:global(.ant-layout-sider-collapsed) {
+    width: $sidebar-collapsed-width !important;
+    min-width: $sidebar-collapsed-width !important;
+    max-width: $sidebar-collapsed-width !important;
+    flex: 0 0 $sidebar-collapsed-width !important;
+  }
+}
+
+.sideMenu {
+  height: calc(100vh - #{$header-height});
+  border-right: 0;
+  padding-top: 16px;
+  
+  :global {
+    .ant-menu-item, .ant-menu-submenu .ant-menu-item {
+      margin: 0;
+      border-radius: 0;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      
+      &::after {
+        display: none;
+      }
+      
+      &.ant-menu-item-selected {
+        background-color: rgba($primary-color, 0.1);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        font-weight: 500;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background-color: $primary-color;
+        }
+      }
+      
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+    }
+    
+    .ant-menu-submenu .ant-menu-item {
+      padding-left: 48px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+      margin: 4px 0 !important;
+      
+      &.ant-menu-item-selected {
+        background-color: rgba($primary-color, 0.12);
+        border-radius: 0 4px 4px 0;
+        color: $primary-color;
+        
+        a {
+          color: $primary-color;
+          font-weight: 600;
+        }
+        
+        &::before {
+          top: 4px;
+          bottom: 4px;
+          border-radius: 0 2px 2px 0;
+        }
+      }
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+    
+    .ant-menu-sub.ant-menu-inline {
+      background: #f9f9f9;
+      border-radius: 0;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .ant-menu-submenu {
+      &-title {
+        margin: 0;
+        border-radius: 0;
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.05);
+        }
+      }
+      
+      &-open {
+        > .ant-menu-submenu-title {
+          color: $primary-color;
+          font-weight: 500;
+        }
+      }
+      
+      &-selected {
+        > .ant-menu-submenu-title {
+          color: $primary-color;
+          font-weight: 500;
+          background-color: rgba($primary-color, 0.08);
+          border-radius: 0;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: $primary-color;
+          }
+        }
+      }
+      
+      &-active {
+        > .ant-menu-submenu-title {
+          color: $primary-color;
+        }
+      }
+      
+      &-inline {
+        &.ant-menu-submenu-open {
+          > .ant-menu-submenu-title {
+            color: $primary-color;
+            background-color: rgba($primary-color, 0.08);
+            font-weight: 500;
+            
+            &::before {
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 0;
+              bottom: 0;
+              width: 4px;
+              background-color: rgba($primary-color, 0.5);
+            }
+          }
+        }
+        
+        > .ant-menu {
+          background-color: #f9f9f9;
+        }
+      }
+    }
+    
+    .ant-menu-item-active, .ant-menu-submenu-active > .ant-menu-submenu-title {
+      color: $primary-color;
+    }
+  }
+
+  :global(.ant-menu-item), :global(.ant-menu-submenu-title) {
+    a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.menuIcon {
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.menuLabel {
+  font-size: $font-size-base;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} 

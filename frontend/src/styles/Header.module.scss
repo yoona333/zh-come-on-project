@@ -1,0 +1,124 @@
+@import './theme.scss';
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+  height: $header-height;
+  transition: all 0.3s $ease-in-out;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.trigger {
+  font-size: 18px;
+  margin-right: 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  
+  &:hover {
+    color: $primary-color;
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  
+  a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    height: 100%;
+  }
+  
+  img {
+    margin-right: 12px;
+    transition: all 0.3s $ease-in-out;
+    height: 32px;
+  }
+}
+
+.logoText {
+  font-size: 20px;
+  font-weight: 600;
+  color: $primary-color;
+  letter-spacing: 0.5px;
+  transition: opacity 0.3s $ease-in-out;
+  white-space: nowrap;
+}
+
+.iconButton {
+  font-size: 18px;
+  padding: 0 12px;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: $background-color-light;
+  }
+}
+
+.notificationBadge {
+  margin-right: 16px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: $border-radius-base;
+  transition: background-color 0.3s;
+  
+  &:hover {
+    background-color: $background-color-light;
+  }
+}
+
+.avatar {
+  margin-right: 8px;
+  background-color: $primary-color;
+}
+
+.userName {
+  font-weight: 500;
+  color: $heading-color;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.notificationItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+} 

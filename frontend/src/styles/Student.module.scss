@@ -1,0 +1,88 @@
+// frontend/src/styles/Student.module.scss
+
+.container {
+    padding: 24px;
+  }
+  
+  .welcome {
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  
+  .statsRow {
+    margin-bottom: 24px;
+  }
+  
+  .statCard {
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 24px 0 16px;
+  }
+  
+  .loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .moreContent {
+    margin-top: 24px;
+    text-align: center;
+  }
+  
+  // 活动列表样式
+  .activityList {
+    margin-top: 16px;
+    
+    :global(.ant-list-item) {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #f0f0f0;
+      transition: all 0.3s;
+      
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
+    :global(.ant-list-item-meta-title) {
+      font-weight: 600;
+    }
+  }
+  
+  // 活动标签样式
+  .activityTags {
+    margin-top: 8px;
+    
+    :global(.ant-tag) {
+      margin-bottom: 4px;
+    }
+  }
+  
+  // 响应式调整
+  @media (max-width: 576px) {
+    .statsRow {
+      > div {
+        margin-bottom: 16px;
+      }
+    }
+    
+    .container {
+      padding: 16px;
+    }
+  }

@@ -1,0 +1,134 @@
+.loginPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .loginContainer {
+    display: flex;
+    width: 1000px;
+    max-width: 90%;
+    height: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* 左侧部分 */
+  .leftSection {
+    flex: 1;
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+  }
+  
+  .logoArea {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .systemName {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+  }
+  
+  .imageContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .illustration {
+    width: 90%;
+    max-width: 500px;
+    height: auto;
+  }
+  
+  /* 右侧部分 */
+  .rightSection {
+    width: 450px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .loginTitle {
+    font-size: 26px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .loginForm {
+    width: 100%;
+  }
+  
+  .optionsRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .forgotLink {
+    color: #1890ff;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .loginButton {
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .tips {
+    margin-top: 20px;
+    color: #ff4d4f;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .copyright {
+    margin-top: 40px;
+    color: #999;
+    font-size: 13px;
+    text-align: center;
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 900px) {
+    .loginContainer {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .leftSection {
+      display: none;
+    }
+    
+    .rightSection {
+      width: 100%;
+      padding: 30px;
+    }
+  }
+
+
